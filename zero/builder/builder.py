@@ -25,7 +25,6 @@ class Builder(NodeVisitor):
 		for deps in node.dependencies:
 			self.visit(deps)
 
-		node.outfile = node.filepath.parent / (node.filepath.name + ".o")
 		self.compiler.build_file(node.filepath, node.outfile)
 		
 

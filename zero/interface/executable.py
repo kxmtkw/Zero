@@ -30,7 +30,7 @@ class Executable:
 	
 
 	@outfile.setter
-	def outfile(self, path: str):
+	def outfile(self, path: str | Path):
 		self._outfile = Path(path)
 
 

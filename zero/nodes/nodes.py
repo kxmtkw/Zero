@@ -32,10 +32,10 @@ class FileNode(Node):
 		
 class SourceNode(FileNode):
 
-	def __init__(self, filepath: Path, deps: list[HeaderNode]):
+	def __init__(self, filepath: Path, outfile: Path, deps: list[HeaderNode]):
 		super().__init__(filepath)
 		self.dependencies: list[HeaderNode] = deps
-		self.outfile: Path
+		self.outfile: Path = outfile
 
 
 class HeaderNode(FileNode):

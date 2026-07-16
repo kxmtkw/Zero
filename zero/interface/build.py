@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Literal
 
 from zero.nodes.nodes import Node, TargetNode
@@ -16,6 +17,7 @@ class Build:
 	def __init__(self) -> None:
 		self._targets: list[Executable] = []
 		self._compiler: Literal["gcc", "clang"] | None = None
+		self._directory: Path = Path("build")
 
 	
 	@property
@@ -26,6 +28,16 @@ class Build:
 	@compiler.setter
 	def compiler(self, name: Literal["gcc", "clang"]):
 		self._compiler = name
+
+
+	@property
+	def directory(self):
+		return self._directory
+
+
+	@directory.setter
+	def directory(self, name: str | Path):
+		self._directory = Path(name)
 
 
 	def add(self, exe: Executable):
@@ -52,8 +64,11 @@ class Build:
 			case _:
 				raise RuntimeError(f"Unknown compiler specified: {self._compiler}")
 			
-
-		graph = GraphConstructor(compiler)
+		
+		if not self._directory.exists():
+			self._directory.mkdir()
+			
+		graph = GraphConstructor(compiler, self._directory)
 		build = Builder(compiler)
 
 		printer = NodePrinter()
