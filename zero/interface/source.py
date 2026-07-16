@@ -14,7 +14,7 @@ class Source:
 		self._sources_paths: list[Path] = []
 
 		for s in self._sources:
-			p = Path(s).absolute()
+			p = Path(s)
 
 			if not p.exists():
 				raise RuntimeError(f"Source file not found: {p}")

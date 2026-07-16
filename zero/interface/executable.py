@@ -34,14 +34,6 @@ class Executable:
 		self._outfile = Path(path)
 
 
-	def _validate_fields(self):
-		if not self._source:
-			raise RuntimeError("No source specified for this executable.")
-		
-		if not self._outfile:
-			raise RuntimeError("No outfile specified for this executable.")
-
-
 	def _str(self, depth=1):
 		indent = "  " * depth
 		src = f"{indent}{self._source._str(depth+1)}" if self._source else f"{indent}Source: None"

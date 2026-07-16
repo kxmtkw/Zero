@@ -1,7 +1,7 @@
-from zero.nodes.nodes import TargetNode
+from zero.nodes.nodes import Node, TargetNode
 from zero.builder.builder import Builder
 from zero.nodes.printer import NodePrinter
-from zero.graph.builder import GraphBuilder
+from zero.graph.constructor import GraphConstructor
 from .executable import Executable
 
 class Build:
@@ -10,22 +10,29 @@ class Build:
 	"""
 
 	def __init__(self) -> None:
-		self._targets: list[Executable] = []
+		self._targets: list[TargetNode] = []
 
 
 	def add(self, exe: Executable):
-		exe._validate_fields()
-		self._targets.append(exe)
+		
+		graph = GraphConstructor()
+
+		if not exe._source:
+			raise RuntimeError("No source specified for this executable.")
+		
+		if not exe._outfile:
+			raise RuntimeError("No outfile specified for this executable.")
+		
+		node = graph.make_executable_node(exe._outfile, exe._source._sources_paths)
+
+		self._targets.append(node)
 		
 
 	def make(self):
 		printer = NodePrinter()
-
-		graph = GraphBuilder()
 		build = Builder()
 
 		for t in self._targets:
-			node = graph.make_executable_node(t.outfile, t.source._sources_paths)
-			printer.visit(node)
-			build.visit(node)
+			printer.visit(t)
+			build.visit(t)
 		

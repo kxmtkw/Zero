@@ -1,7 +1,7 @@
 from zero.nodes.nodes import *
 from zero.compilers.gcc import Compiler
 
-class GraphBuilder:
+class GraphConstructor:
 
 
 	def __init__(self) -> None:
@@ -11,7 +11,7 @@ class GraphBuilder:
 	
 	def make_header_node(self, path: Path) -> HeaderNode:
 
-		deps = self.compiler.get_dependencies(str(path.absolute()))	
+		deps = self.compiler.get_dependencies(str(path))	
 		included_headers = [self.make_header_node(Path(d)) for d in deps]
 
 		if path in self.visited_headers:
@@ -26,9 +26,8 @@ class GraphBuilder:
 			
 
 	def make_source_node(self, path: Path) -> SourceNode:
-		"Make a source node from a filepath."
 
-		deps = self.compiler.get_dependencies(str(path.absolute()))	
+		deps = self.compiler.get_dependencies(str(path))	
 		included_headers = [self.make_header_node(Path(d)) for d in deps]
 
 		source = SourceNode(
@@ -40,7 +39,6 @@ class GraphBuilder:
 	
 
 	def make_executable_node(self, outfile: Path, sources: list[Path]) -> ExecutableNode:
-		"Make an executable node."
 
 		exe = ExecutableNode(
 			outfile,
@@ -48,4 +46,5 @@ class GraphBuilder:
 		)
 
 		return exe
+
 
