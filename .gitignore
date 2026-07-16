@@ -1,0 +1,4 @@
+# dev stuff
+**/__pycache__
+.venv/
+tests/
