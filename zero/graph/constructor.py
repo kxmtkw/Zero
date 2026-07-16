@@ -1,18 +1,18 @@
 from zero.nodes.nodes import *
-from zero.compilers.gcc import Compiler
+from zero.compilers import BaseCompiler
 
 class GraphConstructor:
 
 
-	def __init__(self) -> None:
+	def __init__(self, compiler: BaseCompiler) -> None:
 		self.visited_headers: dict[Path, HeaderNode] = {}
-		self.compiler = Compiler()
+		self.compiler = compiler
 
 	
 	def make_header_node(self, path: Path) -> HeaderNode:
 
-		deps = self.compiler.get_dependencies(str(path))	
-		included_headers = [self.make_header_node(Path(d)) for d in deps]
+		deps = self.compiler.get_dependencies(path)	
+		included_headers = [self.make_header_node(d) for d in deps]
 
 		if path in self.visited_headers:
 			return self.visited_headers[path]
@@ -27,8 +27,8 @@ class GraphConstructor:
 
 	def make_source_node(self, path: Path) -> SourceNode:
 
-		deps = self.compiler.get_dependencies(str(path))	
-		included_headers = [self.make_header_node(Path(d)) for d in deps]
+		deps = self.compiler.get_dependencies(path)	
+		included_headers = [self.make_header_node(d) for d in deps]
 
 		source = SourceNode(
 			path,
