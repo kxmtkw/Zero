@@ -1,5 +1,7 @@
 from zero.nodes.nodes import TargetNode
 from zero.builder.builder import Builder
+from zero.nodes.printer import NodePrinter
+from zero.graph.builder import GraphBuilder
 from .executable import Executable
 
 class Build:
@@ -8,14 +10,22 @@ class Build:
 	"""
 
 	def __init__(self) -> None:
-		self._nodes: list[TargetNode] = []
+		self._targets: list[Executable] = []
+
 
 	def add(self, exe: Executable):
-		self._nodes.append(exe._make_node())
+		exe._validate_fields()
+		self._targets.append(exe)
 		
 
 	def make(self):
+		printer = NodePrinter()
+
+		graph = GraphBuilder()
 		build = Builder()
-		for n in self._nodes:
-			build.visit(n)
+
+		for t in self._targets:
+			node = graph.make_executable_node(t.outfile, t.source._sources_paths)
+			printer.visit(node)
+			build.visit(node)
 		

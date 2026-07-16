@@ -34,18 +34,13 @@ class Executable:
 		self._outfile = Path(path)
 
 
-	def _make_node(self) -> ExecutableNode:
+	def _validate_fields(self):
 		if not self._source:
 			raise RuntimeError("No source specified for this executable.")
 		
 		if not self._outfile:
 			raise RuntimeError("No outfile specified for this executable.")
-		
-		return ExecutableNode(
-			self._outfile,
-			self._source._sources_nodes
-		)
-	
+
 
 	def _str(self, depth=1):
 		indent = "  " * depth

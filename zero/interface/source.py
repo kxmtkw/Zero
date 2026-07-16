@@ -11,16 +11,15 @@ class Source:
 	def __init__(self, *files: str) -> None:
 
 		self._sources: list[str] = list(dict.fromkeys(files))
-		self._sources_nodes: list[SourceNode] = []
+		self._sources_paths: list[Path] = []
 
 		for s in self._sources:
 			p = Path(s).absolute()
-			o = p.parent / (p.name + ".o")
 
 			if not p.exists():
 				raise RuntimeError(f"Source file not found: {p}")
 			
-			self._sources_nodes.append(SourceNode(p, o, []))
+			self._sources_paths.append(p)
 
 
 

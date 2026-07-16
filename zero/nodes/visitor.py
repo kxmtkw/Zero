@@ -8,14 +8,20 @@ class NodeVisitor:
 
 
 	def visit(self, node: Node):
-		if isinstance(node, ExecutableNode):
-			self.visitExecutableNode(node)
-		elif isinstance(node, SourceNode):
+	
+		if isinstance(node, SourceNode):
 			self.visitSourceNode(node)
 		elif isinstance(node, HeaderNode):
 			self.visitHeaderNode(node)
+		elif isinstance(node, ExecutableNode):
+			self.visitExecutableNode(node)
+		elif isinstance(node, RootNode):
+			self.visitRootNode(node)
 
 	
+	def visitRootNode(self, node: RootNode):
+		pass 
+
 	def visitExecutableNode(self, node: ExecutableNode):
 		pass
 
