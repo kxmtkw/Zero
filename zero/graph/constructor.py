@@ -38,8 +38,9 @@ class GraphConstructor:
 		included_headers = [self.make_header_node(d) for d in deps]
 
 		outfile = self.objects_dir / path.parent / (path.name + ".o")
+
 		if not outfile.parent.exists():
-			outfile.mkdir(511, True, True)
+			outfile.parent.mkdir(511, True, True)
 
 		source = SourceNode(
 			path,
