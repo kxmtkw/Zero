@@ -53,6 +53,8 @@ class Build:
 
 	def make(self):
 
+		print(">> Setting up build...")
+
 		if self._compiler is None:
 			raise RuntimeError("No compiler specified.")
 		
@@ -64,16 +66,19 @@ class Build:
 			case _:
 				raise RuntimeError(f"Unknown compiler specified: {self._compiler}")
 			
+		print(f"Compiler: {self._compiler}")
 		
 		if not self._directory.exists():
 			self._directory.mkdir()
-			
+
+		print(f"Build directory: {str(self._directory)}")
+
 		graph = GraphConstructor(compiler, self._directory)
 		build = Builder(compiler)
 
-		printer = NodePrinter()
+		print(">> Starting build...")
+		
 		for t in self._targets:
 			node = graph.make_executable_node(t._outfile, t._source._sources_paths)
-			printer.visit(node)
 			build.visit(node)
 		

@@ -12,16 +12,19 @@ class Builder(NodeVisitor):
 
 
 	def visitExecutableNode(self, node: ExecutableNode):
-		print(f">> Making Executable...")
 
 		for deps in node.dependencies:
 			self.visit(deps)
 
 		self.compiler.link([n.outfile for n in node.dependencies], node.outfile)
 
+		print(f">> Linked executable: {str(node.outfile)}")
+
 
 	def visitSourceNode(self, node: SourceNode):
+
 		print(f"-- Building source: {node.filepath}")
+
 		for deps in node.dependencies:
 			self.visit(deps)
 
