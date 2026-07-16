@@ -54,13 +54,12 @@ class GraphConstructor:
 
 		if not outfile.parent.exists():
 			outfile.parent.mkdir(511, True, True)
-			
+
 		exe = ExecutableNode(
 			outfile,
 			[self.make_source_node(s) for s in sources]
 		)
 
-		
 		return exe
 
 
