@@ -1,7 +1,9 @@
 from pathlib import Path
 from .source import Source
+from .lib import Library
 
-class StaticLibrary:
+
+class StaticLibrary(Library):
 	"""
 	Class to build a static library.
 	"""
@@ -9,7 +11,7 @@ class StaticLibrary:
 	def __init__(self) -> None:
 		self._source: Source
 		self._outfile: Path
-		self._linked_libs: list[StaticLibrary] = []
+		self._linked_libs: list[Library] = []
 
 
 	@property
@@ -40,5 +42,5 @@ class StaticLibrary:
 		self._outfile = Path(path)
 
 
-	def link(self, library: StaticLibrary):
+	def link(self, library: Library):
 		self._linked_libs.append(library)

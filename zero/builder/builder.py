@@ -10,6 +10,7 @@ class Builder(NodeVisitor):
 	def __init__(self, compiler: BaseCompiler) -> None:
 		super().__init__()
 		self.compiler = compiler
+		self.compiling_shared_lib = False
 
 
 	def visitRootNode(self, node: RootNode):
@@ -31,7 +32,20 @@ class Builder(NodeVisitor):
 
 
 	def visitSharedLibraryNode(self, node: SharedLibraryNode):
-		return super().visitSharedLibraryNode(node)
+
+		print(f">> Compiling shared lib: {str(node.outfile)}")
+
+		self.compiling_shared_lib = True
+
+		for deps in node.sources:
+			self.visit(deps)
+
+		for libs in node.linked_libraries:
+			self.visit(libs)
+
+		self.compiler.build_shared_lib([n.outfile for n in node.sources], [l.outfile for l in node.linked_libraries], node.outfile)
+
+		self.compiling_shared_lib = False
 	
 
 	def visitExecutableNode(self, node: ExecutableNode):
@@ -54,7 +68,7 @@ class Builder(NodeVisitor):
 		for deps in node.headers:
 			self.visit(deps)
 
-		self.compiler.build_file(node.filepath, node.outfile)
+		self.compiler.build_file(node.filepath, node.outfile, for_shared=self.compiling_shared_lib)
 		
 
 	def visitHeaderNode(self, node: HeaderNode):

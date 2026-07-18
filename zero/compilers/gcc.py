@@ -40,7 +40,7 @@ class Gcc(BaseCompiler):
 	def build_file(self, filepath: Path, outfile: Path, *, for_shared = False) -> None:  
 
 		process = subprocess.run(
-			["gcc", "-c", str(filepath), "-o", str(outfile)], 
+			["gcc", "-c", "-fPIC" if for_shared else "", str(filepath), "-o", str(outfile)], 
 			capture_output=True, 
 			text=True
 		)
@@ -66,9 +66,17 @@ class Gcc(BaseCompiler):
 	def build_shared_lib(self, objects: list[Path], libraries: list[Path], outfile: Path) -> None:  
 		
 		str_objects = [str(obj) for obj in objects]
+		
+		cmd = ["gcc", "-shared", "-o", str(outfile), *str_objects]
+		
+		if libraries:
+			cmd.append("-Wl,--whole-archive")
+			for lib in libraries:
+				cmd.append(str(lib))
+			cmd.append("-Wl,--no-whole-archive")
 
 		process = subprocess.run(
-			["gcc", "-shared", str(outfile), *str_objects], 
+			cmd, 
 			capture_output=True, 
 			text=True
 		)

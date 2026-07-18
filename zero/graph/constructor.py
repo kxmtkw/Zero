@@ -1,3 +1,4 @@
+
 from zero.nodes.nodes import *
 from zero.compilers import BaseCompiler
 
@@ -5,11 +6,13 @@ from zero.compilers import BaseCompiler
 from zero.interface.build import Build
 from zero.interface.executable import Executable
 from zero.interface.source import Source
+from zero.interface.lib import Library
 from zero.interface.static_lib import StaticLibrary
+from zero.interface.shared_lib import SharedLibrary
+
 
 
 class GraphConstructor:
-
 
 	def __init__(self, compiler: BaseCompiler, build_dir: Path) -> None:
 
@@ -18,6 +21,7 @@ class GraphConstructor:
 
 		self.made_executables: dict[Executable, ExecutableNode] = {}
 		self.made_static_libs: dict[StaticLibrary, StaticLibraryNode] = {}
+		self.made_shared_libs: dict[SharedLibrary, SharedLibraryNode] = {}
 
 		self.compiler = compiler
 		self.build_dir = build_dir
@@ -35,9 +39,10 @@ class GraphConstructor:
 		for t in build._targets:
 			if isinstance(t, Executable):
 				targets.append(self.make_executable_node(t))
-			elif isinstance(t, StaticLibrary):
-				targets.append(self.make_static_library_node(t))
-	
+			elif isinstance(t, Library):
+				targets.append(self.make_library_node(t))
+
+
 		return RootNode(targets)
 	
 
@@ -93,16 +98,26 @@ class GraphConstructor:
 		if not exe.outfile.parent.exists():
 			exe.outfile.parent.mkdir(511, True, True)
 
+		
 		node = ExecutableNode(
 			exe.outfile,
 			self.make_source_nodes(exe.source),
-			[self.make_static_library_node(lib) for lib in exe._linked_libs]
+			[self.make_library_node(lib) for lib in exe._linked_libs]
 		)
 
 		self.made_executables[exe] = node
 
 		return node
 	
+
+	def make_library_node(self, lib: Library) -> LibraryNode:
+		if isinstance(lib, StaticLibrary):
+			return self.make_static_library_node(lib)
+		elif isinstance(lib, SharedLibrary):
+			return self.make_shared_library_node(lib)
+		else:
+			raise RuntimeError("What")
+
 
 	def make_static_library_node(self, lib: StaticLibrary) -> StaticLibraryNode:
 		
@@ -115,7 +130,7 @@ class GraphConstructor:
 		node = StaticLibraryNode(
 			lib.outfile,
 			self.make_source_nodes(lib.source),
-			[self.make_static_library_node(lib) for lib in lib._linked_libs]
+			[self.make_library_node(lib) for lib in lib._linked_libs]
 		)
 
 		self.made_static_libs[lib] = node
@@ -123,17 +138,19 @@ class GraphConstructor:
 		return node
 	
 
-	def make_shared_library_node(self, outfile: Path, sources: list[Path], libs: list[LibraryNode]) -> SharedLibraryNode:
+	def make_shared_library_node(self, lib: SharedLibrary) -> SharedLibraryNode:
 
-		if not outfile.parent.exists():
-			outfile.parent.mkdir(511, True, True)
+		if not lib.outfile.parent.exists():
+			lib.outfile.parent.mkdir(511, True, True)
 
-		lib = SharedLibraryNode(
-			outfile,
-			[self.make_source_node(s) for s in sources],
-			libs
+		node = SharedLibraryNode(
+			lib.outfile,
+			self.make_source_nodes(lib.source),
+			[self.make_library_node(lib) for lib in lib._linked_libs]
 		)
 
-		return lib
+		self.made_shared_libs[lib] = node
+		
+		return node
 
 

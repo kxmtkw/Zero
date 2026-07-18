@@ -1,15 +1,11 @@
 from pathlib import Path
-
-from zero.interface.lib import Library
-
-from .static_lib import StaticLibrary
 from .source import Source
-from zero.nodes.nodes import ExecutableNode
+from .lib import Library
 
 
-class Executable:
+class SharedLibrary(Library):
 	"""
-	Class to build an executable.
+	Class to build a shared library.
 	"""
 
 	def __init__(self) -> None:
@@ -20,11 +16,10 @@ class Executable:
 
 	@property
 	def source(self):
-		"Specify the source files for the executable. Can only be set once."	
 
 		if not hasattr(self, "_source"):
-			raise RuntimeError("Source not specified for this source.")
-			
+			raise RuntimeError("Source not specified for this library.")
+		
 		return self._source
 	
 
@@ -35,10 +30,9 @@ class Executable:
 	
 	@property
 	def outfile(self):
-		"Specify the output files for the executable. Can only be set once."
 
 		if not hasattr(self, "_outfile"):
-			raise RuntimeError("Outfile not specified for this source.")
+			raise RuntimeError("Outfile not specified for this library.")
 		
 		return self._outfile
 	
@@ -49,5 +43,4 @@ class Executable:
 
 
 	def link(self, library: Library):
-		"Link a library to this executable."
 		self._linked_libs.append(library)

@@ -2,6 +2,8 @@ from pathlib import Path
 from typing import Literal
 from typing_extensions import Self
 
+from zero.interface.lib import Library
+
 
 from .executable import Executable
 from .static_lib import StaticLibrary
@@ -33,7 +35,6 @@ class Build:
 		self._directory: Path = Path("build")
 
 
-	
 	@property
 	def compiler(self):
 		"""
@@ -61,7 +62,7 @@ class Build:
 		self._directory = Path(name)
 
 
-	def add(self, target: Executable | StaticLibrary):
+	def add(self, target: Executable | Library):
 		"""
 		Add a target to the build procedure.
 		 
@@ -81,7 +82,7 @@ class Build:
 			
 			self._targets.append(target)
 
-		elif isinstance(target, StaticLibrary):
+		elif isinstance(target, Library):
 
 			if not target._source:
 				raise RuntimeError("No source specified for this library.")
