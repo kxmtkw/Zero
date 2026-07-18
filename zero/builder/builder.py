@@ -13,6 +13,8 @@ class Builder(NodeVisitor):
 		self.compiling_shared_lib = False
 
 		self.include_dirs: list[Path] = []
+		
+		self.visited_nodes: set[object] = set()
 
 
 	def visitRootNode(self, node: RootNode):
@@ -21,6 +23,8 @@ class Builder(NodeVisitor):
 
 
 	def visitStaticLibraryNode(self, node: StaticLibraryNode):
+		if node in self.visited_nodes:
+			return
 
 		print(f">> Compiling static lib: {str(node.outfile)}")
 
@@ -39,9 +43,13 @@ class Builder(NodeVisitor):
 			self.visit(deps)
 
 		self.compiler.build_static_lib([n.outfile for n in node.sources], node.outfile)
+		
+		self.visited_nodes.add(node)
 
 
 	def visitSharedLibraryNode(self, node: SharedLibraryNode):
+		if node in self.visited_nodes:
+			return
 
 		print(f">> Compiling shared lib: {str(node.outfile)}")
 
@@ -64,9 +72,12 @@ class Builder(NodeVisitor):
 		self.compiler.build_shared_lib([n.outfile for n in node.sources], [l.outfile for l in node.linked_libraries], node.outfile)
 
 		self.compiling_shared_lib = False
+		self.visited_nodes.add(node)
 	
 
 	def visitExecutableNode(self, node: ExecutableNode):
+		if node in self.visited_nodes:
+			return
 		
 		print(f">> Building executable: {str(node.outfile)}")
 
@@ -85,8 +96,12 @@ class Builder(NodeVisitor):
 
 		self.compiler.build_executable([n.outfile for n in node.sources], [n.outfile for n in node.linked_libraries], node.outfile)
 
+		self.visited_nodes.add(node)
+
 		
 	def visitSourceNode(self, node: SourceNode):
+		if node in self.visited_nodes:
+			return
 
 		print(f"-- Building source: {node.filepath}")
 
@@ -94,6 +109,8 @@ class Builder(NodeVisitor):
 			self.visit(deps)
 
 		self.compiler.build_file(node.filepath, node.outfile, for_shared=self.compiling_shared_lib, include_dirs=self.include_dirs)
+		
+		self.visited_nodes.add(node)
 		
 
 	def visitHeaderNode(self, node: HeaderNode):
