@@ -4,91 +4,92 @@ from .visitor import NodeVisitor
 
 class NodePrinter(NodeVisitor):
 
-	def __init__(self) -> None:
-		super().__init__()
-		self.depth = 0
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._depth: int = 0
+        self._visited_ids: set[int] = set()
 
 
-	def visitRootNode(self, node: RootNode):
-		print("-- Build Project Root --") 
-		for t in node.targets:
-			self.visit(t)
-			print()
+    def _get_indent(self) -> str:
+        return "    " * self._depth
 
 
-	def visitExecutableNode(self, node: ExecutableNode):
-		print(f"Executable: {hex(id(node))}")
-		self.depth += 1
-
-		print("  " * self.depth,  end="")
-		print("(Sources)\n")
-
-		for deps in node.sources:
-			self.visit(deps)
-
-		print("  " * self.depth,  end="")
-		print("(Linked Libs)\n")
-
-		for lib in node.linked_libraries:
-			print("  " * self.depth,  end="")
-			print(f"Library: {hex(id(lib))}")
-		
-		self.depth -= 1
-
-	
-	def visitStaticLibraryNode(self, node: StaticLibraryNode):
-		print(f"Static Library: {hex(id(node))}")
-		self.depth += 1
-
-		print("  " * self.depth,  end="")
-		print("(Sources)\n")
-
-		for deps in node.sources:
-			self.visit(deps)
-
-		print("  " * self.depth,  end="")
-		print("(Linked Libs)\n")
-
-		for lib in node.linked_libraries:
-			print("  " * self.depth,  end="")
-			print(f"Library: {hex(id(lib))}")
-		
-		self.depth -= 1
+    def _print_node_base(self, node: Node, label: str, details: str) -> bool:
+        hex_id = f"0x{id(node):0x}"
+        indent = self._get_indent()
+        
+        if id(node) in self._visited_ids:
+            print(f"{indent}[{label}] {details} -> see {hex_id}")
+            return True
+            
+        self._visited_ids.add(id(node))
+        print(f"{indent}[{label}] {details} ({hex_id})")
+        return False
 
 
-	def visitSharedLibraryNode(self, node: SharedLibraryNode):
-		print(f"Shared Library: {hex(id(node))}")
-		self.depth += 1
-
-		print("  " * self.depth,  end="")
-		print("(Sources)\n")
-
-		for deps in node.sources:
-			self.visit(deps)
-
-		print("  " * self.depth,  end="")
-		print("(Linked Libs)\n")
-
-		for lib in node.linked_libraries:
-			print("  " * self.depth,  end="")
-			print(f"Library: {hex(id(lib))}")
-		
-		self.depth -= 1
+    def visitRootNode(self, node: RootNode):
+        if self._print_node_base(node, "Root", f"{len(node.targets)} targets"):
+            return
+            
+        self._depth += 1
+        for target in node.targets:
+            self.visit(target)
+        self._depth -= 1
 
 
-	def visitSourceNode(self, node: SourceNode):
-		print("  " * self.depth,  end="")
-		print(f"Source: {node.filepath} {hex(id(node))}")
-		self.depth += 1
-		for deps in node.sources:
-			self.visit(deps)
-		self.depth -= 1
+    def visitExecutableNode(self, node: ExecutableNode):
+        if self._print_node_base(node, "Executable", str(node.outfile)):
+            return
+            
+        self._depth += 1
+        for src in node.sources:
+            self.visit(src)
+        for lib in node.linked_libraries:
+            self.visit(lib)
+        self._depth -= 1
 
 
-	def visitHeaderNode(self, node: HeaderNode):
-		print("  " * self.depth, end="")
-		print(f"Header: {node.filepath} {hex(id(node))}")
-		self.depth += 1
-		for deps in node.sources:
-			self.visit(deps)
-		self.depth -= 1
+    def visitStaticLibraryNode(self, node: StaticLibraryNode):
+        if self._print_node_base(node, "StaticLibrary", str(node.outfile)):
+            return
+            
+        self._depth += 1
+        for src in node.sources:
+            self.visit(src)
+        for lib in node.linked_libraries:
+            self.visit(lib)
+        self._depth -= 1
+
+
+    def visitSharedLibraryNode(self, node: SharedLibraryNode):
+        if self._print_node_base(node, "SharedLibrary", str(node.outfile)):
+            return
+            
+        self._depth += 1
+        for src in node.sources:
+            self.visit(src)
+        for lib in node.linked_libraries:
+            self.visit(lib)
+        self._depth -= 1
+    
+
+    def visitSourceNode(self, node: SourceNode):
+        details = f"{node.filepath} -> {node.outfile}"
+        if self._print_node_base(node, "Source", details):
+            return
+            
+        self._depth += 1
+        for header in node.headers:
+            self.visit(header)
+        self._depth -= 1
+
+
+    def visitHeaderNode(self, node: HeaderNode):
+        if self._print_node_base(node, "Header", str(node.filepath)):
+            return
+            
+        self._depth += 1
+        for header in node.headers:
+            self.visit(header)
+        self._depth -= 1

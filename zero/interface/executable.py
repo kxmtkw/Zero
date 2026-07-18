@@ -42,10 +42,6 @@ class Executable:
 
 	@outfile.setter
 	def outfile(self, path: str | Path):
-
-		if self._outfile is not None:
-			raise RuntimeError("Outfile already specified.")
-		
 		self._outfile = Path(path)
 
 

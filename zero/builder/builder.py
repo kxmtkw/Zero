@@ -1,4 +1,5 @@
 from zero.nodes.nodes import *
+from zero.nodes.nodes import SharedLibraryNode
 from zero.nodes.visitor import NodeVisitor
 
 from zero.compilers import BaseCompiler
@@ -14,7 +15,7 @@ class Builder(NodeVisitor):
 	def visitRootNode(self, node: RootNode):
 		for target in node.targets:
 			self.visit(target)
-			
+
 
 	def visitStaticLibraryNode(self, node: StaticLibraryNode):
 
@@ -25,6 +26,10 @@ class Builder(NodeVisitor):
 
 		print(f">> Linked static library: {str(node.outfile)}")
 
+
+	def visitSharedLibraryNode(self, node: SharedLibraryNode):
+		return super().visitSharedLibraryNode(node)
+	
 
 	def visitExecutableNode(self, node: ExecutableNode):
 
@@ -40,12 +45,12 @@ class Builder(NodeVisitor):
 
 		print(f"-- Building source: {node.filepath}")
 
-		for deps in node.sources:
+		for deps in node.headers:
 			self.visit(deps)
 
 		self.compiler.build_file(node.filepath, node.outfile)
 		
 
 	def visitHeaderNode(self, node: HeaderNode):
-		for deps in node.sources:
+		for deps in node.headers:
 			self.visit(deps)

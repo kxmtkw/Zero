@@ -4,6 +4,7 @@ from zero.interface.build import Build
 from zero.graph.constructor import GraphConstructor
 from zero.builder.builder import Builder
 from zero.compilers import Gcc
+from zero.nodes.printer import NodePrinter
 
 
 class Orchestrator:
@@ -30,6 +31,9 @@ class Orchestrator:
 		self.graph = GraphConstructor(Gcc(), build.directory)
 		root = self.graph.make_root(build)
 
+		printer = NodePrinter()
+		printer.visit(root)
+		
 		print(">> Starting build...")
 
 		self.builder = Builder(Gcc())

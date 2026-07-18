@@ -1,7 +1,10 @@
+from abc import ABC, abstractmethod
 from .nodes import *
 
 
-class NodeVisitor:
+
+class NodeVisitor(ABC):
+
 
 	def __init__(self) -> None:
 		pass
@@ -22,21 +25,27 @@ class NodeVisitor:
 		elif isinstance(node, RootNode):
 			self.visitRootNode(node)
 
-	
+
+	@abstractmethod
 	def visitRootNode(self, node: RootNode):
 		pass 
 
+	@abstractmethod
 	def visitExecutableNode(self, node: ExecutableNode):
 		pass
 
+	@abstractmethod
 	def visitStaticLibraryNode(self, node: StaticLibraryNode):
 		pass
 
+	@abstractmethod
 	def visitSharedLibraryNode(self, node: SharedLibraryNode):
 		pass
-
+	
+	@abstractmethod
 	def visitSourceNode(self, node: SourceNode):
 		pass
 
+	@abstractmethod
 	def visitHeaderNode(self, node: HeaderNode):
 		pass
