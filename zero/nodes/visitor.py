@@ -15,6 +15,10 @@ class NodeVisitor:
 			self.visitHeaderNode(node)
 		elif isinstance(node, ExecutableNode):
 			self.visitExecutableNode(node)
+		elif isinstance(node, StaticLibraryNode):
+			self.visitStaticLibraryNode(node)
+		elif isinstance(node, SharedLibraryNode):
+			self.visitSharedLibraryNode(node)
 		elif isinstance(node, RootNode):
 			self.visitRootNode(node)
 
@@ -23,6 +27,12 @@ class NodeVisitor:
 		pass 
 
 	def visitExecutableNode(self, node: ExecutableNode):
+		pass
+
+	def visitStaticLibraryNode(self, node: StaticLibraryNode):
+		pass
+
+	def visitSharedLibraryNode(self, node: SharedLibraryNode):
 		pass
 
 	def visitSourceNode(self, node: SourceNode):

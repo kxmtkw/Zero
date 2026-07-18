@@ -1,19 +1,15 @@
 from pathlib import Path
-
-from .static_lib import StaticLibrary
 from .source import Source
-from zero.nodes.nodes import ExecutableNode
 
-class Executable:
+class StaticLibrary:
 	"""
-	Class to build an executable.
+	Class to build a static library.
 	"""
 
 	def __init__(self) -> None:
 		self._source: Source | None = None
 		self._outfile: Path | None = None
 		self._linked_libs: list[StaticLibrary] = []
-		self._exe_node: ExecutableNode | None = None
 
 
 	@property

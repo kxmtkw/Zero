@@ -11,12 +11,27 @@ class Builder(NodeVisitor):
 		self.compiler = compiler
 
 
-	def visitExecutableNode(self, node: ExecutableNode):
+	def visitRootNode(self, node: RootNode):
+		for target in node.targets:
+			self.visit(target)
+			
 
-		for deps in node.dependencies:
+	def visitStaticLibraryNode(self, node: StaticLibraryNode):
+
+		for deps in node.sources:
 			self.visit(deps)
 
-		self.compiler.link([n.outfile for n in node.dependencies], node.outfile)
+		self.compiler.build_static_lib([n.outfile for n in node.sources], node.outfile)
+
+		print(f">> Linked static library: {str(node.outfile)}")
+
+
+	def visitExecutableNode(self, node: ExecutableNode):
+
+		for deps in node.sources:
+			self.visit(deps)
+
+		self.compiler.build_executable([n.outfile for n in node.sources], [n.outfile for n in node.linked_libraries], node.outfile)
 
 		print(f">> Linked executable: {str(node.outfile)}")
 
@@ -25,12 +40,12 @@ class Builder(NodeVisitor):
 
 		print(f"-- Building source: {node.filepath}")
 
-		for deps in node.dependencies:
+		for deps in node.sources:
 			self.visit(deps)
 
 		self.compiler.build_file(node.filepath, node.outfile)
 		
 
 	def visitHeaderNode(self, node: HeaderNode):
-		for deps in node.dependencies:
+		for deps in node.sources:
 			self.visit(deps)

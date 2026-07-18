@@ -19,13 +19,3 @@ class Source:
 				raise RuntimeError(f"Source file not found: {str(p)}")
 			
 			self._sources_paths.append(p)
-
-
-
-	def _str(self, depth=1) -> str:
-		indent = "  " * depth
-		return f"Source:\n{'\n'.join([f'{indent}{str(s)}' for s in self._sources_paths])}"
-	
-
-	def __str__(self) -> str:
-		return self._str()
