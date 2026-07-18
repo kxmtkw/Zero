@@ -22,6 +22,9 @@ class Builder(NodeVisitor):
 		for deps in node.sources:
 			self.visit(deps)
 
+		for libs in node.linked_libraries:
+			self.visit(libs)
+			
 		self.compiler.build_static_lib([n.outfile for n in node.sources], node.outfile)
 
 		print(f">> Linked static library: {str(node.outfile)}")
@@ -35,6 +38,9 @@ class Builder(NodeVisitor):
 
 		for deps in node.sources:
 			self.visit(deps)
+
+		for libs in node.linked_libraries:
+			self.visit(libs)
 
 		self.compiler.build_executable([n.outfile for n in node.sources], [n.outfile for n in node.linked_libraries], node.outfile)
 

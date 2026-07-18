@@ -24,6 +24,7 @@ class Orchestrator:
 			
 		print(f"Chosen Compiler: {build.compiler}")
 
+		build.directory.mkdir(511, True, True)
 		print(f"Build Directory: {build.directory}")
 
 		print(">> Constructing build graph...")
@@ -33,7 +34,7 @@ class Orchestrator:
 
 		printer = NodePrinter()
 		printer.visit(root)
-		
+
 		print(">> Starting build...")
 
 		self.builder = Builder(Gcc())
