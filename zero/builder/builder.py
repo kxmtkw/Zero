@@ -19,15 +19,15 @@ class Builder(NodeVisitor):
 
 	def visitStaticLibraryNode(self, node: StaticLibraryNode):
 
+		print(f">> Compiling static lib: {str(node.outfile)}")
+
 		for deps in node.sources:
 			self.visit(deps)
 
 		for libs in node.linked_libraries:
 			self.visit(libs)
-			
-		self.compiler.build_static_lib([n.outfile for n in node.sources], node.outfile)
 
-		print(f">> Linked static library: {str(node.outfile)}")
+		self.compiler.build_static_lib([n.outfile for n in node.sources], node.outfile)
 
 
 	def visitSharedLibraryNode(self, node: SharedLibraryNode):
@@ -35,6 +35,8 @@ class Builder(NodeVisitor):
 	
 
 	def visitExecutableNode(self, node: ExecutableNode):
+		
+		print(f">> Building executable: {str(node.outfile)}")
 
 		for deps in node.sources:
 			self.visit(deps)
@@ -44,9 +46,7 @@ class Builder(NodeVisitor):
 
 		self.compiler.build_executable([n.outfile for n in node.sources], [n.outfile for n in node.linked_libraries], node.outfile)
 
-		print(f">> Linked executable: {str(node.outfile)}")
-
-
+		
 	def visitSourceNode(self, node: SourceNode):
 
 		print(f"-- Building source: {node.filepath}")
