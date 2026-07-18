@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Literal
+from typing_extensions import Self
 
 
 from .executable import Executable
@@ -8,19 +9,37 @@ from .static_lib import StaticLibrary
 
 class Build:
 	"""
-	Core class to make the build system. 
+	Core singleton to make the build system.
 	"""
 
-	def __init__(self) -> None:
-		self._targets: list[Executable | StaticLibrary] = []
+	_instance = None
+	_initialized = False
 
-		self._compiler: Literal["gcc", "clang"] | None = None
-		self._directory: Path | None = None
+
+	def __new__(cls, *args, **kwargs):
+		if cls._instance is None:
+			cls._instance = super().__new__(cls)
+			cls._initialized = False
+		return cls._instance
+
+
+	def __init__(self) -> None:
+
+		if self._initialized: return
+		self._initialized = True
+		
+		self._targets: list[Executable | StaticLibrary] = []
+		self._compiler: Literal["gcc", "clang", "best"] = "best"
+		self._directory: Path = Path("build")
+
 
 	
 	@property
 	def compiler(self):
-		"Specify a compiler."
+		"""
+		Specify a compiler for the build system. 
+		If not specified, finds the best matched compiler depending on the platform.
+		"""
 		return self._compiler
 
 
@@ -31,6 +50,9 @@ class Build:
 
 	@property
 	def directory(self):
+		"""
+		Set a directory for the build system. If not specified, defaults to ./build
+		"""
 		return self._directory
 
 
@@ -40,7 +62,15 @@ class Build:
 
 
 	def add(self, target: Executable | StaticLibrary):
-		
+		"""
+		Add a target to the build procedure.
+		 
+		Some things to be cautious of:
+		- This should only be used for targets that are expected as final results. \
+		For example, if an executable depends on a static library but the library itself is not required as a final product, \
+		then that static library should not be added.
+		"""
+
 		if isinstance(target, Executable):
 
 			if not target._source:

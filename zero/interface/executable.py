@@ -10,14 +10,18 @@ class Executable:
 	"""
 
 	def __init__(self) -> None:
-		self._source: Source | None = None
-		self._outfile: Path | None = None
+		self._source: Source
+		self._outfile: Path
 		self._linked_libs: list[StaticLibrary] = []
-		self._exe_node: ExecutableNode | None = None
 
 
 	@property
 	def source(self):
+		"Specify the source files for the executable. Can only be set once."	
+
+		if not hasattr(self, "_source"):
+			raise RuntimeError("Source not specified for this source.")
+			
 		return self._source
 	
 
@@ -28,13 +32,23 @@ class Executable:
 	
 	@property
 	def outfile(self):
+		"Specify the output files for the executable. Can only be set once."
+
+		if not hasattr(self, "_outfile"):
+			raise RuntimeError("Outfile not specified for this source.")
+		
 		return self._outfile
 	
 
 	@outfile.setter
 	def outfile(self, path: str | Path):
+
+		if self._outfile is not None:
+			raise RuntimeError("Outfile already specified.")
+		
 		self._outfile = Path(path)
 
 
 	def link(self, library: StaticLibrary):
+		"Link a library to this executable."
 		self._linked_libs.append(library)

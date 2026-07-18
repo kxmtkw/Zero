@@ -12,11 +12,18 @@ class GraphConstructor:
 
 
 	def __init__(self, compiler: BaseCompiler, build_dir: Path) -> None:
+
 		self.visited_headers: dict[Path, HeaderNode] = {}
+		self.visited_sources: dict[Path, SourceNode] = {}
+
+		self.made_executables: dict[Executable, ExecutableNode] = {}
+		self.made_static_libs: dict[StaticLibrary, StaticLibraryNode] = {}
+
 		self.compiler = compiler
 		self.build_dir = build_dir
 
 		self.objects_dir = build_dir / "objects"
+
 		if not self.objects_dir.exists():
 			self.objects_dir.mkdir()
 
@@ -36,22 +43,25 @@ class GraphConstructor:
 
 	def make_header_node(self, path: Path) -> HeaderNode:
 
+		if path in self.visited_headers:
+			return self.visited_headers[path]
+		
 		deps = self.compiler.get_dependencies(path)	
 		included_headers = [self.make_header_node(d) for d in deps]
 
-		if path in self.visited_headers:
-			return self.visited_headers[path]
-		else:
-			header = HeaderNode(
-				path,
-				included_headers
-			)
-			self.visited_headers[path] = header
-			return header
+		header = HeaderNode(
+			path,
+			included_headers
+		)
+		self.visited_headers[path] = header
+		return header
 			
 
 	def _make_source_node(self, path: Path) -> SourceNode:
 
+		if path in self.visited_sources:
+			return self.visited_sources[path]
+		
 		deps = self.compiler.get_dependencies(path)	
 		included_headers = [self.make_header_node(d) for d in deps]
 
@@ -66,46 +76,50 @@ class GraphConstructor:
 			included_headers
 		)
 
+		self.visited_sources[path] = source
+
 		return source
 	
 
 	def make_source_nodes(self, source: Source) -> list[SourceNode]:
 		return [self._make_source_node(p) for p in source._sources_paths]
-
 	
 
 	def make_executable_node(self, exe: Executable) -> ExecutableNode:
 		
-		outfile = exe.outfile
-
-		if not outfile:
-			raise RuntimeError("no")
+		if exe in self.made_executables:
+			return self.made_executables[exe]
 		
-		if not outfile.parent.exists():
-			outfile.parent.mkdir(511, True, True)
+		if not exe.outfile.parent.exists():
+			exe.outfile.parent.mkdir(511, True, True)
 
 		node = ExecutableNode(
-			outfile,
+			exe.outfile,
 			self.make_source_nodes(exe.source),
 			[self.make_static_library_node(lib) for lib in exe._linked_libs]
 		)
+
+		self.made_executables[exe] = node
 
 		return node
 	
 
 	def make_static_library_node(self, lib: StaticLibrary) -> StaticLibraryNode:
-
-		outfile = lib.outfile
-
-		if not outfile.parent.exists():
-			outfile.parent.mkdir(511, True, True)
+		
+		if lib in self.made_static_libs:
+			return self.made_static_libs[lib]
+		
+		if not lib.outfile.parent.exists():
+			lib.outfile.parent.mkdir(511, True, True)
 
 		node = StaticLibraryNode(
-			outfile,
+			lib.outfile,
 			self.make_source_nodes(lib.source),
 			[self.make_static_library_node(lib) for lib in lib._linked_libs]
 		)
 
+		self.made_static_libs[lib] = node
+		
 		return node
 	
 

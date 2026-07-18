@@ -7,13 +7,17 @@ class StaticLibrary:
 	"""
 
 	def __init__(self) -> None:
-		self._source: Source | None = None
-		self._outfile: Path | None = None
+		self._source: Source
+		self._outfile: Path
 		self._linked_libs: list[StaticLibrary] = []
 
 
 	@property
 	def source(self):
+
+		if not hasattr(self, "_source"):
+			raise RuntimeError("Source not specified for this library.")
+		
 		return self._source
 	
 
@@ -24,6 +28,10 @@ class StaticLibrary:
 	
 	@property
 	def outfile(self):
+
+		if not hasattr(self, "_outfile"):
+			raise RuntimeError("Outfile not specified for this library.")
+		
 		return self._outfile
 	
 
