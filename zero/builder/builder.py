@@ -12,6 +12,8 @@ class Builder(NodeVisitor):
 		self.compiler = compiler
 		self.compiling_shared_lib = False
 
+		self.include_dirs: list[Path] = []
+
 
 	def visitRootNode(self, node: RootNode):
 		for target in node.targets:
@@ -22,11 +24,19 @@ class Builder(NodeVisitor):
 
 		print(f">> Compiling static lib: {str(node.outfile)}")
 
+		include_dirs = []
+
+		for lib in node.linked_libraries:
+			self.visit(lib)
+			include_dirs.extend(lib.public_headers)
+
+		include_dirs.extend(node.public_headers)
+		include_dirs.extend(node.private_headers)
+
+		self.include_dirs = include_dirs
+		
 		for deps in node.sources:
 			self.visit(deps)
-
-		for libs in node.linked_libraries:
-			self.visit(libs)
 
 		self.compiler.build_static_lib([n.outfile for n in node.sources], node.outfile)
 
@@ -37,11 +47,19 @@ class Builder(NodeVisitor):
 
 		self.compiling_shared_lib = True
 
+		include_dirs = []
+
+		for lib in node.linked_libraries:
+			self.visit(lib)
+			include_dirs.extend(lib.public_headers)
+
+		include_dirs.extend(node.public_headers)
+		include_dirs.extend(node.private_headers)
+
+		self.include_dirs = include_dirs
+
 		for deps in node.sources:
 			self.visit(deps)
-
-		for libs in node.linked_libraries:
-			self.visit(libs)
 
 		self.compiler.build_shared_lib([n.outfile for n in node.sources], [l.outfile for l in node.linked_libraries], node.outfile)
 
@@ -52,11 +70,18 @@ class Builder(NodeVisitor):
 		
 		print(f">> Building executable: {str(node.outfile)}")
 
+		include_dirs = []
+
+		for lib in node.linked_libraries:
+			self.visit(lib)
+			include_dirs.extend(lib.public_headers)
+
+		include_dirs.extend(node.private_headers)
+
+		self.include_dirs = include_dirs
+
 		for deps in node.sources:
 			self.visit(deps)
-
-		for libs in node.linked_libraries:
-			self.visit(libs)
 
 		self.compiler.build_executable([n.outfile for n in node.sources], [n.outfile for n in node.linked_libraries], node.outfile)
 
@@ -68,7 +93,7 @@ class Builder(NodeVisitor):
 		for deps in node.headers:
 			self.visit(deps)
 
-		self.compiler.build_file(node.filepath, node.outfile, for_shared=self.compiling_shared_lib)
+		self.compiler.build_file(node.filepath, node.outfile, for_shared=self.compiling_shared_lib, include_dirs=self.include_dirs)
 		
 
 	def visitHeaderNode(self, node: HeaderNode):

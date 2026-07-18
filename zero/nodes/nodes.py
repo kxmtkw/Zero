@@ -22,26 +22,29 @@ class TargetNode(Node):
 class LibraryNode(TargetNode):
 	
 	@abstractmethod
-	def __init__(self, outfile: Path, sources: list[SourceNode], libs: list[LibraryNode]):
+	def __init__(self, outfile: Path, sources: list[SourceNode], libs: list[LibraryNode], private_headers: list[Path], public_headers: list[Path]):
 		super().__init__(outfile, sources, libs)
+		self.private_headers = private_headers
+		self.public_headers = public_headers
 
 
 class StaticLibraryNode(LibraryNode):
 	
-	def __init__(self, outfile: Path, sources: list[SourceNode], libs: list[LibraryNode]):
-		super().__init__(outfile, sources, libs)
+	def __init__(self, outfile: Path, sources: list[SourceNode], libs: list[LibraryNode], private_headers: list[Path], public_headers: list[Path]):
+		super().__init__(outfile, sources, libs, private_headers, public_headers)
 
 
 class SharedLibraryNode(LibraryNode):
 	
-	def __init__(self, outfile: Path, sources: list[SourceNode], libs: list[LibraryNode]):
-		super().__init__(outfile, sources, libs)
+	def __init__(self, outfile: Path, sources: list[SourceNode], libs: list[LibraryNode], private_headers: list[Path], public_headers: list[Path]):
+		super().__init__(outfile, sources, libs, private_headers, public_headers)
 
 
 class ExecutableNode(TargetNode):
 	
-	def __init__(self, outfile: Path, sources: list[SourceNode], libs: list[LibraryNode]):
+	def __init__(self, outfile: Path, sources: list[SourceNode], libs: list[LibraryNode], private_headers: list[Path]):
 		super().__init__(outfile, sources, libs)
+		self.private_headers = private_headers
 
 
 class FileNode(Node):

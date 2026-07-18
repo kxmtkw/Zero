@@ -3,7 +3,7 @@ from pathlib import Path
 from zero.interface.build import Build
 from zero.graph.constructor import GraphConstructor
 from zero.builder.builder import Builder
-from zero.compilers import Gcc
+from zero.compilers import GccCompiler, GxxCompiler
 from zero.nodes.printer import NodePrinter
 
 
@@ -18,7 +18,9 @@ class Orchestrator:
 
 		match build.compiler:
 			case "gcc":
-				compiler = Gcc()
+				compiler = GccCompiler()
+			case "g++":
+				compiler = GxxCompiler()
 			case _:
 				raise RuntimeError(f"Unknown compiler specified: {build.compiler}")
 			

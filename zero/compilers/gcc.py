@@ -3,11 +3,12 @@ import subprocess
 from .base import BaseCompiler
 
 
-class Gcc(BaseCompiler):
+class GccCompiler(BaseCompiler):
 
 
 	def __init__(self) -> None:
 		super().__init__()
+		self.compiler_binary = self.linker_binary = "gcc"
 
 
 	def _parse_dependencies(self, gcc_output: str) -> list[Path]:
@@ -23,10 +24,12 @@ class Gcc(BaseCompiler):
 		return [Path(p) for p in filepaths]
 
 
-	def get_dependencies(self, filepath: Path) -> list[Path]:
+	def get_dependencies(self, filepath: Path, *, include_dirs: list[Path] = []) -> list[Path]:
+		
+		include_args = [f"-I{str(dir)}" for dir in include_dirs]
 
 		process = subprocess.run(
-			["gcc", "-MM", str(filepath)], 
+			[self.compiler_binary, "-MM", *include_args, str(filepath)], 
 			capture_output=True, 
 			text=True
 		)
@@ -37,10 +40,17 @@ class Gcc(BaseCompiler):
 		return self._parse_dependencies(process.stdout)
 
 
-	def build_file(self, filepath: Path, outfile: Path, *, for_shared = False) -> None:  
+	def build_file(self, filepath: Path, outfile: Path, *, for_shared = False, include_dirs: list[Path] = []) -> None:  
+
+		include_args = [f"-I{str(dir)}" for dir in include_dirs]
+
+		cmd = [self.compiler_binary, "-c", *include_args, str(filepath), "-o", str(outfile)] 
+
+		if for_shared:
+			cmd.append("-fPIC")
 
 		process = subprocess.run(
-			["gcc", "-c", "-fPIC" if for_shared else "", str(filepath), "-o", str(outfile)], 
+			cmd,
 			capture_output=True, 
 			text=True
 		)
@@ -67,7 +77,7 @@ class Gcc(BaseCompiler):
 		
 		str_objects = [str(obj) for obj in objects]
 		
-		cmd = ["gcc", "-shared", "-o", str(outfile), *str_objects]
+		cmd = [self.compiler_binary, "-shared", "-o", str(outfile), *str_objects]
 		
 		if libraries:
 			cmd.append("-Wl,--whole-archive")
@@ -91,7 +101,7 @@ class Gcc(BaseCompiler):
 		str_libs = [str(lib) for lib in libraries]
 
 		process = subprocess.run(
-			["gcc", *str_objects, *str_libs, "-o", str(outfile)], 
+			[self.compiler_binary, *str_objects, *str_libs, "-o", str(outfile)], 
 			capture_output=True, 
 			text=True
 		)

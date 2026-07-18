@@ -1,7 +1,7 @@
 from pathlib import Path
 from .source import Source
 from .lib import Library
-
+from .headers import Headers
 
 class StaticLibrary(Library):
 	"""
@@ -9,6 +9,7 @@ class StaticLibrary(Library):
 	"""
 
 	def __init__(self) -> None:
+		self.headers = Headers()
 		self._source: Source
 		self._name: str
 		self._linked_libs: list[Library] = []

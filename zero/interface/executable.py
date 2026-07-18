@@ -4,7 +4,7 @@ from zero.interface.lib import Library
 
 from .static_lib import StaticLibrary
 from .source import Source
-from zero.nodes.nodes import ExecutableNode
+from .headers import Headers
 
 
 class Executable:
@@ -13,6 +13,7 @@ class Executable:
 	"""
 
 	def __init__(self, name: str) -> None:
+		self.headers = Headers()
 		self._source: Source
 		self._name: str = name
 		self._linked_libs: list[Library] = []

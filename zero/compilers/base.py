@@ -12,12 +12,12 @@ class BaseCompiler(ABC):
 
 
 	@abstractmethod
-	def get_dependencies(self, filepath: Path) -> list[Path]:
+	def get_dependencies(self, filepath: Path, *, include_dirs: list[Path] = []) -> list[Path]:
 		pass
 
 
 	@abstractmethod
-	def build_file(self, filepath: Path, outfile: Path, *, for_shared = False) -> None:  
+	def build_file(self, filepath: Path, outfile: Path, *, for_shared = False, include_dirs: list[Path] = []) -> None:  
 		pass
 	
 

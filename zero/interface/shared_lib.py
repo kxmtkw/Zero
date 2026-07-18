@@ -1,4 +1,6 @@
 from pathlib import Path
+
+from .headers import Headers
 from .source import Source
 from .lib import Library
 
@@ -9,6 +11,7 @@ class SharedLibrary(Library):
 	"""
 
 	def __init__(self, name: str) -> None:
+		self.headers = Headers()
 		self._source: Source
 		self._name: str = name
 		self._linked_libs: list[Library] = []

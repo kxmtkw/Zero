@@ -1,37 +1,19 @@
 from pathlib import Path
 from typing import Literal
-from typing_extensions import Self
 
-from zero.interface.lib import Library
-
-
+from .lib import Library
 from .executable import Executable
-from .static_lib import StaticLibrary
 
 
 class Build:
 	"""
-	Core singleton to make the build system.
+	Core class to make the build system.
 	"""
-
-	_instance = None
-	_initialized = False
-
-
-	def __new__(cls, *args, **kwargs):
-		if cls._instance is None:
-			cls._instance = super().__new__(cls)
-			cls._initialized = False
-		return cls._instance
 
 
 	def __init__(self) -> None:
-
-		if self._initialized: return
-		self._initialized = True
-		
 		self._targets: list[Executable | Library] = []
-		self._compiler: Literal["gcc", "clang", "best"] = "best"
+		self._compiler: Literal["gcc", "g++", "clang", "best"] = "best"
 		self._directory: Path = Path("build")
 
 
@@ -45,7 +27,7 @@ class Build:
 
 
 	@compiler.setter
-	def compiler(self, name: Literal["gcc", "clang"]):
+	def compiler(self, name:  Literal["gcc", "g++", "clang"]):
 		self._compiler = name
 
 
