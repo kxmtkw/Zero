@@ -30,7 +30,7 @@ class Build:
 		if self._initialized: return
 		self._initialized = True
 		
-		self._targets: list[Executable | StaticLibrary] = []
+		self._targets: list[Executable | Library] = []
 		self._compiler: Literal["gcc", "clang", "best"] = "best"
 		self._directory: Path = Path("build")
 
@@ -74,20 +74,14 @@ class Build:
 
 		if isinstance(target, Executable):
 
-			if not target._source:
+			if not hasattr(target, "_source"):
 				raise RuntimeError("No source specified for this executable.")
-			
-			if not target._outfile:
-				raise RuntimeError("No outfile specified for this executable.")
 			
 			self._targets.append(target)
 
 		elif isinstance(target, Library):
 
-			if not target._source:
+			if not hasattr(target, "_source"):
 				raise RuntimeError("No source specified for this library.")
-			
-			if not target._outfile:
-				raise RuntimeError("No outfile specified for this library.")
 			
 			self._targets.append(target)

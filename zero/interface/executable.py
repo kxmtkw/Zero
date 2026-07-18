@@ -12,9 +12,9 @@ class Executable:
 	Class to build an executable.
 	"""
 
-	def __init__(self) -> None:
+	def __init__(self, name: str) -> None:
 		self._source: Source
-		self._outfile: Path
+		self._name: str = name
 		self._linked_libs: list[Library] = []
 
 
@@ -34,19 +34,14 @@ class Executable:
 
 	
 	@property
-	def outfile(self):
+	def name(self):
 		"Specify the output files for the executable. Can only be set once."
 
-		if not hasattr(self, "_outfile"):
-			raise RuntimeError("Outfile not specified for this source.")
+		if not hasattr(self, "_name"):
+			raise RuntimeError("name not specified for this source.")
 		
-		return self._outfile
+		return self._name
 	
-
-	@outfile.setter
-	def outfile(self, path: str | Path):
-		self._outfile = Path(path)
-
 
 	def link(self, library: Library):
 		"Link a library to this executable."

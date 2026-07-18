@@ -14,7 +14,15 @@ from zero.interface.shared_lib import SharedLibrary
 
 class GraphConstructor:
 
-	def __init__(self, compiler: BaseCompiler, build_dir: Path) -> None:
+	def __init__(
+			self, 
+			compiler: BaseCompiler, 
+			build_dir: Path,
+			object_dir: Path,
+			exec_dir: Path,
+			static_lib_dir: Path,
+			shared_lib_dir: Path
+			) -> None:
 
 		self.visited_headers: dict[Path, HeaderNode] = {}
 		self.visited_sources: dict[Path, SourceNode] = {}
@@ -24,13 +32,14 @@ class GraphConstructor:
 		self.made_shared_libs: dict[SharedLibrary, SharedLibraryNode] = {}
 
 		self.compiler = compiler
+
+
 		self.build_dir = build_dir
-
-		self.objects_dir = build_dir / "objects"
-
-		if not self.objects_dir.exists():
-			self.objects_dir.mkdir()
-
+		self.object_dir = object_dir
+		self.exec_dir = exec_dir
+		self.static_lib_dir = static_lib_dir
+		self.shared_lib_dir = shared_lib_dir
+		
 
 	def make_root(self, build: Build) -> RootNode:
 		
@@ -70,7 +79,7 @@ class GraphConstructor:
 		deps = self.compiler.get_dependencies(path)	
 		included_headers = [self.make_header_node(d) for d in deps]
 
-		outfile = self.objects_dir / path.parent / (path.name + ".o")
+		outfile = self.object_dir / path.parent / (path.name + ".o")
 
 		if not outfile.parent.exists():
 			outfile.parent.mkdir(511, True, True)
@@ -95,12 +104,10 @@ class GraphConstructor:
 		if exe in self.made_executables:
 			return self.made_executables[exe]
 		
-		if not exe.outfile.parent.exists():
-			exe.outfile.parent.mkdir(511, True, True)
-
+		outfile = self.exec_dir / exe.name
 		
 		node = ExecutableNode(
-			exe.outfile,
+			outfile,
 			self.make_source_nodes(exe.source),
 			[self.make_library_node(lib) for lib in exe._linked_libs]
 		)
@@ -124,11 +131,10 @@ class GraphConstructor:
 		if lib in self.made_static_libs:
 			return self.made_static_libs[lib]
 		
-		if not lib.outfile.parent.exists():
-			lib.outfile.parent.mkdir(511, True, True)
+		outfile = self.static_lib_dir / ("lib" + lib.name + ".a")
 
 		node = StaticLibraryNode(
-			lib.outfile,
+			outfile,
 			self.make_source_nodes(lib.source),
 			[self.make_library_node(lib) for lib in lib._linked_libs]
 		)
@@ -140,11 +146,13 @@ class GraphConstructor:
 
 	def make_shared_library_node(self, lib: SharedLibrary) -> SharedLibraryNode:
 
-		if not lib.outfile.parent.exists():
-			lib.outfile.parent.mkdir(511, True, True)
+		if lib in self.made_shared_libs:
+			return self.made_shared_libs[lib]
+		
+		outfile = self.shared_lib_dir / ("lib" + lib.name + ".so")
 
 		node = SharedLibraryNode(
-			lib.outfile,
+			outfile,
 			self.make_source_nodes(lib.source),
 			[self.make_library_node(lib) for lib in lib._linked_libs]
 		)
