@@ -13,7 +13,7 @@ class Build:
 
 	def __init__(self) -> None:
 		self._targets: list[Executable | Library] = []
-		self._compiler: Literal["gcc", "g++", "clang", "best"] = "best"
+		self._compiler: Literal["gcc", "g++", "clang", "clang++", "best"] = "best"
 		self._directory: Path = Path("build")
 
 
@@ -27,7 +27,7 @@ class Build:
 
 
 	@compiler.setter
-	def compiler(self, name:  Literal["gcc", "g++", "clang"]):
+	def compiler(self, name: Literal["gcc", "g++", "clang", "clang++", "best"]):
 		self._compiler = name
 
 

@@ -3,7 +3,7 @@ from pathlib import Path
 from zero.interface.build import Build
 from zero.graph.constructor import GraphConstructor
 from zero.builder.builder import Builder
-from zero.compilers import GccCompiler, GxxCompiler
+from zero.compilers import GccCompiler, GxxCompiler, ClangCompiler, ClangxxCompiler
 from zero.nodes.printer import NodePrinter
 
 
@@ -21,6 +21,10 @@ class Orchestrator:
 				compiler = GccCompiler()
 			case "g++":
 				compiler = GxxCompiler()
+			case "clang":
+				compiler = ClangCompiler()
+			case "clang++":
+				compiler = ClangxxCompiler()
 			case _:
 				raise RuntimeError(f"Unknown compiler specified: {build.compiler}")
 			
