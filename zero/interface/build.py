@@ -8,18 +8,19 @@ from .static_lib import StaticLibrary
 
 class Build:
 	"""
-	Core class to make the build system
+	Core class to make the build system. 
 	"""
 
 	def __init__(self) -> None:
 		self._targets: list[Executable | StaticLibrary] = []
 
 		self._compiler: Literal["gcc", "clang"] | None = None
-		self._directory: Path = Path("build")
+		self._directory: Path | None = None
 
 	
 	@property
 	def compiler(self):
+		"Specify a compiler."
 		return self._compiler
 
 
