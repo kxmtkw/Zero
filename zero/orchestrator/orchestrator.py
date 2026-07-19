@@ -4,7 +4,7 @@ from zero.interface.build import Build
 from zero.graph.constructor import GraphConstructor
 from zero.builder.builder import Builder
 from zero.compilers import GccCompiler, GxxCompiler, ClangCompiler, ClangxxCompiler
-from zero.nodes.printer import NodePrinter
+from zero.graph.printer import NodePrinter
 
 
 class Orchestrator:

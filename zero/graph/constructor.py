@@ -1,5 +1,5 @@
 
-from zero.nodes.nodes import *
+from zero.graph.nodes import *
 from zero.compilers import BaseCompiler
 
 

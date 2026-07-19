@@ -1,6 +1,6 @@
-from zero.nodes.nodes import *
-from zero.nodes.nodes import SharedLibraryNode
-from zero.nodes.visitor import NodeVisitor
+from zero.graph.nodes import *
+from zero.graph.nodes import SharedLibraryNode
+from zero.graph.visitor import NodeVisitor
 
 from zero.compilers import BaseCompiler
 

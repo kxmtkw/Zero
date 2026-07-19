@@ -1,5 +1,5 @@
 from pathlib import Path
-from zero.nodes.nodes import SourceNode
+from zero.graph.nodes import SourceNode
 
 class Source:
 	"""
