@@ -59,7 +59,7 @@ class Orchestrator:
 			shared_dir
 		)
 
-		root = self.graph.make_root(build)
+		root = self.graph.makeRoot(build)
 
 		printer = NodePrinter()
 		printer.visit(root)

@@ -12,25 +12,25 @@ class BaseCompiler(ABC):
 
 
 	@abstractmethod
-	def get_dependencies(self, filepath: Path, *, include_dirs: list[Path] = []) -> list[Path]:
+	def getDependencies(self, filepath: Path, *, include_dirs: list[Path] = []) -> list[Path]:
 		pass
 
 
 	@abstractmethod
-	def build_file(self, filepath: Path, outfile: Path, *, for_shared = False, include_dirs: list[Path] = [], arguments: list[str] = []) -> None:  
+	def buildFile(self, filepath: Path, outfile: Path, *, for_shared = False, include_dirs: list[Path] = [], arguments: list[str] = []) -> None:  
 		pass
 	
 
 	@abstractmethod
-	def build_static_lib(self, objects: list[Path], outfile: Path) -> None:  
+	def buildStaticLib(self, objects: list[Path], outfile: Path) -> None:  
 		pass
 
 
 	@abstractmethod
-	def build_shared_lib(self, objects: list[Path], libraries: list[Path], outfile: Path) -> None:  
+	def buildSharedLib(self, objects: list[Path], libraries: list[Path], outfile: Path) -> None:  
 		pass
 
 
 	@abstractmethod
-	def build_executable(self, objects: list[Path], libraries: list[Path], outfile: Path) -> None:  
+	def buildExecutable(self, objects: list[Path], libraries: list[Path], outfile: Path) -> None:  
 		pass

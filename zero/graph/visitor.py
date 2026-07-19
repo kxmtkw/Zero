@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from .nodes import *
+from typing import Callable, Type
 
+from zero.graph.nodes import *
 
 
 class NodeVisitor(ABC):
@@ -11,49 +12,40 @@ class NodeVisitor(ABC):
 
 
 	def visit(self, node: Node):
-	
-		if isinstance(node, SourceNode):
-			self.visitSourceNode(node)
-		elif isinstance(node, HeaderNode):
-			self.visitHeaderNode(node)
-		elif isinstance(node, ExecutableNode):
-			self.visitExecutableNode(node)
-		elif isinstance(node, StaticLibraryNode):
-			self.visitStaticLibraryNode(node)
-		elif isinstance(node, SharedLibraryNode):
-			self.visitSharedLibraryNode(node)
-		elif isinstance(node, PreCompiledLibraryNode):
-			self.visitPreCompiledLibraryNode(node)
-		elif isinstance(node, RootNode):
-			self.visitRootNode(node)
-		else:
-			raise RuntimeError("WHAT")
+
+		method_name = f"visit{type(node).__name__}"
+		method = getattr(self, method_name)
+
+		if method_name is None:
+			raise NotImplementedError(f"{method_name} not implemented for {type(self)}")
+		
+		method(node)
 
 
 	@abstractmethod
-	def visitRootNode(self, node: RootNode):
+	def visitRootNode(self, node: RootNode) -> None:
 		pass 
 
 	@abstractmethod
-	def visitExecutableNode(self, node: ExecutableNode):
+	def visitExecutableNode(self, node: ExecutableNode) -> None:
 		pass
 
 	@abstractmethod
-	def visitStaticLibraryNode(self, node: StaticLibraryNode):
+	def visitStaticLibraryNode(self, node: StaticLibraryNode) -> None:
 		pass
 
 	@abstractmethod
-	def visitSharedLibraryNode(self, node: SharedLibraryNode):
+	def visitSharedLibraryNode(self, node: SharedLibraryNode) -> None:
 		pass
 
 	@abstractmethod
-	def visitPreCompiledLibraryNode(self, node: PreCompiledLibraryNode):
+	def visitPreCompiledLibraryNode(self, node: PreCompiledLibraryNode) -> None:
 		pass
 	
 	@abstractmethod
-	def visitSourceNode(self, node: SourceNode):
+	def visitSourceNode(self, node: SourceNode) -> None:
 		pass
 
 	@abstractmethod
-	def visitHeaderNode(self, node: HeaderNode):
+	def visitHeaderNode(self, node: HeaderNode) -> None:
 		pass

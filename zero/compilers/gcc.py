@@ -11,7 +11,7 @@ class GccCompiler(BaseCompiler):
 		self.compiler_binary = self.linker_binary = "gcc"
 
 
-	def _parse_dependencies(self, gcc_output: str) -> list[Path]:
+	def _parseDependencies(self, gcc_output: str) -> list[Path]:
 		cleaned = gcc_output.replace("\\\n", " ").replace("\\", " ")
 		
 		if ":" not in cleaned:
@@ -24,7 +24,7 @@ class GccCompiler(BaseCompiler):
 		return [Path(p) for p in filepaths]
 
 
-	def get_dependencies(self, filepath: Path, *, include_dirs: list[Path] = []) -> list[Path]:
+	def getDependencies(self, filepath: Path, *, include_dirs: list[Path] = []) -> list[Path]:
 		
 		include_args = [f"-I{str(dir)}" for dir in include_dirs]
 
@@ -37,10 +37,10 @@ class GccCompiler(BaseCompiler):
 		if process.returncode != 0:
 			raise RuntimeError(process.stderr)
 		
-		return self._parse_dependencies(process.stdout)
+		return self._parseDependencies(process.stdout)
 
 
-	def build_file(self, filepath: Path, outfile: Path, *, for_shared = False, include_dirs: list[Path] = [], arguments: list[str] = []) -> None:  
+	def buildFile(self, filepath: Path, outfile: Path, *, for_shared = False, include_dirs: list[Path] = [], arguments: list[str] = []) -> None:  
 
 		include_args = [f"-I{str(dir)}" for dir in include_dirs]
 
@@ -59,7 +59,7 @@ class GccCompiler(BaseCompiler):
 			raise RuntimeError(process.stderr)
 
 		
-	def build_static_lib(self, objects: list[Path], outfile: Path) -> None:  
+	def buildStaticLib(self, objects: list[Path], outfile: Path) -> None:  
 		
 		str_objects = [str(obj) for obj in objects]
 
@@ -73,7 +73,7 @@ class GccCompiler(BaseCompiler):
 			raise RuntimeError(process.stderr)
 		
 
-	def build_shared_lib(self, objects: list[Path], libraries: list[Path], outfile: Path) -> None:  
+	def buildSharedLib(self, objects: list[Path], libraries: list[Path], outfile: Path) -> None:  
 		
 		str_objects = [str(obj) for obj in objects]
 		
@@ -95,7 +95,7 @@ class GccCompiler(BaseCompiler):
 			raise RuntimeError(process.stderr)
 
 
-	def build_executable(self, objects: list[Path], libraries: list[Path], outfile: Path) -> None:  
+	def buildExecutable(self, objects: list[Path], libraries: list[Path], outfile: Path) -> None:  
 		
 		str_objects = [str(obj) for obj in objects]
 		str_libs = [str(lib) for lib in libraries]

@@ -3,6 +3,7 @@ from zero.graph.visitor import NodeVisitor
 from zero.graph.nodes import *
 
 
+
 class CycleDetector(NodeVisitor):
 
 

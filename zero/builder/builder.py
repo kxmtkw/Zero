@@ -46,7 +46,7 @@ class Builder(NodeVisitor):
 		for deps in node.sources:
 			self.visit(deps)
 
-		self.compiler.build_static_lib([n.outpath for n in node.sources], node.libpath)
+		self.compiler.buildStaticLib([n.outpath for n in node.sources], node.libpath)
 		
 		self.visited_nodes.add(node)
 
@@ -75,7 +75,7 @@ class Builder(NodeVisitor):
 		for deps in node.sources:
 			self.visit(deps)
 
-		self.compiler.build_shared_lib([n.outpath for n in node.sources], [l.libpath for l in node.linked_libraries], node.libpath)
+		self.compiler.buildSharedLib([n.outpath for n in node.sources], [l.libpath for l in node.linked_libraries], node.libpath)
 		
 		self.compiling_shared_lib = False
 		self.visited_nodes.add(node)
@@ -110,7 +110,7 @@ class Builder(NodeVisitor):
 		for deps in node.sources:
 			self.visit(deps)
 
-		self.compiler.build_executable([n.outpath for n in node.sources], [n.libpath for n in node.linked_libraries], node.targetpath)
+		self.compiler.buildExecutable([n.outpath for n in node.sources], [n.libpath for n in node.linked_libraries], node.targetpath)
 
 		self.visited_nodes.add(node)
 
@@ -124,7 +124,7 @@ class Builder(NodeVisitor):
 		for deps in node.deps:
 			self.visit(deps)
 
-		self.compiler.build_file(
+		self.compiler.buildFile(
 			node.filepath, 
 			node.outpath, 
 			for_shared=self.compiling_shared_lib, 

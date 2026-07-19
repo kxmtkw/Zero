@@ -1,4 +1,3 @@
-
 from zero.graph.nodes import *
 from zero.compilers import BaseCompiler
 
@@ -43,36 +42,36 @@ class GraphConstructor:
 		self.include_dirs: list[Path] = []
 		
 
-	def make_root(self, build: Build) -> RootNode:
+	def makeRoot(self, build: Build) -> RootNode:
 		
-		return RootNode([self.make_target_node(t) for t in build._targets])
+		return RootNode([self.makeTargetNode(t) for t in build._targets])
 	
 
-	def make_target_node(self, target) -> TargetNode:
+	def makeTargetNode(self, target) -> TargetNode:
 
 		if isinstance(target, Executable):
-			return self.make_executable_node(target)
+			return self.makeExecutableNode(target)
 		elif isinstance(target, StaticLibrary):
-			return self.make_static_library_node(target)
+			return self.makeStaticLibraryNode(target)
 		elif isinstance(target, SharedLibrary):
-			return self.make_shared_library_node(target)
+			return self.makeSharedLibraryNode(target)
 		else:
 			raise RuntimeError("What")
 
 
-	def make_library_node(self, lib: Library) -> LibraryNode:
+	def makeLibraryNode(self, lib: Library) -> LibraryNode:
 
 		if isinstance(lib, PreCompiledLibrary):
-			return self.make_precompiled_lib_node(lib)
+			return self.makePrecompiledLibNode(lib)
 		elif isinstance(lib, StaticLibrary):
-			return self.make_static_library_node(lib)
+			return self.makeStaticLibraryNode(lib)
 		elif isinstance(lib, SharedLibrary):
-			return self.make_shared_library_node(lib)
+			return self.makeSharedLibraryNode(lib)
 		else:
 			raise RuntimeError("What")
 
 
-	def make_executable_node(self, exe: Executable) -> ExecutableNode:
+	def makeExecutableNode(self, exe: Executable) -> ExecutableNode:
 		
 		if exe in self.made_executables:
 			return self.made_executables[exe]
@@ -83,15 +82,15 @@ class GraphConstructor:
 		lib_nodes: list[LibraryNode] = []
 
 		for lib in exe._linked_libs:
-			lib_node = self.make_library_node(lib)
+			lib_node = self.makeLibraryNode(lib)
 			lib_nodes.append(lib_node)
-			include_dirs.extend(lib_node.public_headers)		
+			include_dirs.extend(lib_node.public_headers)        
 		
 		include_dirs.extend(exe.headers.private)
 
 		self.include_dirs = include_dirs
 
-		source_nodes = self.make_source_nodes(exe.source)
+		source_nodes = self.makeSourceNodes(exe.source)
 
 		node = ExecutableNode(
 			outfile,
@@ -107,7 +106,7 @@ class GraphConstructor:
 	
 
 
-	def make_static_library_node(self, lib: StaticLibrary) -> StaticLibraryNode:
+	def makeStaticLibraryNode(self, lib: StaticLibrary) -> StaticLibraryNode:
 		
 		if lib in self.made_static_libs:
 			return self.made_static_libs[lib]
@@ -119,16 +118,16 @@ class GraphConstructor:
 		lib_nodes: list[LibraryNode] = []
 
 		for sub_lib in lib._linked_libs:
-			lib_node = self.make_library_node(sub_lib)
+			lib_node = self.makeLibraryNode(sub_lib)
 			lib_nodes.append(lib_node)
-			include_dirs.extend(lib_node.public_headers)		
+			include_dirs.extend(lib_node.public_headers)        
 		
 		include_dirs.extend(lib.headers.private)
 		include_dirs.extend(lib.headers.public)
 
 		self.include_dirs = include_dirs
 
-		source_nodes = self.make_source_nodes(lib.source)
+		source_nodes = self.makeSourceNodes(lib.source)
 		
 		node = StaticLibraryNode(
 			outfile,
@@ -144,7 +143,7 @@ class GraphConstructor:
 		return node
 	
 
-	def make_shared_library_node(self, lib: SharedLibrary) -> SharedLibraryNode:
+	def makeSharedLibraryNode(self, lib: SharedLibrary) -> SharedLibraryNode:
 
 		if lib in self.made_shared_libs:
 			return self.made_shared_libs[lib]
@@ -155,16 +154,16 @@ class GraphConstructor:
 		lib_nodes: list[LibraryNode] = []
 
 		for sub_lib in lib._linked_libs:
-			lib_node = self.make_library_node(sub_lib)
+			lib_node = self.makeLibraryNode(sub_lib)
 			lib_nodes.append(lib_node)
-			include_dirs.extend(lib_node.public_headers)		
+			include_dirs.extend(lib_node.public_headers)        
 		
 		include_dirs.extend(lib.headers.private)
 		include_dirs.extend(lib.headers.public)
 
 		self.include_dirs = include_dirs
 
-		source_nodes = self.make_source_nodes(lib.source)
+		source_nodes = self.makeSourceNodes(lib.source)
 		
 		node = SharedLibraryNode(
 			outfile,
@@ -180,14 +179,14 @@ class GraphConstructor:
 		return node
 
 
-	def make_precompiled_lib_node(self, lib: PreCompiledLibrary) -> PreCompiledLibraryNode:
+	def makePrecompiledLibNode(self, lib: PreCompiledLibrary) -> PreCompiledLibraryNode:
 		return PreCompiledLibraryNode(
 			lib.filepath,
 			lib.headers.public
 		)
 
 
-	def make_header_node(self, path: Path) -> HeaderNode:
+	def makeHeaderNode(self, path: Path) -> HeaderNode:
 
 		if path in self.visited_headers:
 			return self.visited_headers[path]
@@ -198,15 +197,15 @@ class GraphConstructor:
 		)
 		self.visited_headers[path] = header
 
-		deps = self.compiler.get_dependencies(path, include_dirs=self.include_dirs)	
-		included_headers = [self.make_header_node(d) for d in deps]
+		deps = self.compiler.getDependencies(path, include_dirs=self.include_dirs) 
+		included_headers = [self.makeHeaderNode(d) for d in deps]
 
 		header.deps = included_headers
 		
 		return header
 			
 
-	def _make_source_node(self, path: Path) -> SourceNode:
+	def _makeSourceNode(self, path: Path) -> SourceNode:
 
 		if path in self.visited_sources:
 			return self.visited_sources[path]
@@ -224,14 +223,13 @@ class GraphConstructor:
 
 		self.visited_sources[path] = source
 
-		deps = self.compiler.get_dependencies(path, include_dirs=self.include_dirs)	
-		included_headers = [self.make_header_node(d) for d in deps]
+		deps = self.compiler.getDependencies(path, include_dirs=self.include_dirs) 
+		included_headers = [self.makeHeaderNode(d) for d in deps]
 
 		source.deps = included_headers
 
 		return source
 	
 
-	def make_source_nodes(self, source: Source) -> list[SourceNode]:
-		return [self._make_source_node(p) for p in source._sources_paths]
-	
+	def makeSourceNodes(self, source: Source) -> list[SourceNode]:
+		return [self._makeSourceNode(p) for p in source._sources_paths]
