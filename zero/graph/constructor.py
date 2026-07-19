@@ -9,7 +9,7 @@ from zero.interface.source import Source
 from zero.interface.lib import Library
 from zero.interface.static_lib import StaticLibrary
 from zero.interface.shared_lib import SharedLibrary
-
+from zero.interface.precomp_lib import PreCompiledLibrary
 
 
 class GraphConstructor:
@@ -30,6 +30,7 @@ class GraphConstructor:
 		self.made_executables: dict[Executable, ExecutableNode] = {}
 		self.made_static_libs: dict[StaticLibrary, StaticLibraryNode] = {}
 		self.made_shared_libs: dict[SharedLibrary, SharedLibraryNode] = {}
+		self.made_ompiled_libs: dict[PreCompiledLibrary, PreCompiledLibraryNode] = {}
 
 		self.compiler = compiler
 
@@ -44,67 +45,32 @@ class GraphConstructor:
 
 	def make_root(self, build: Build) -> RootNode:
 		
-		targets: list[TargetNode] = []
-
-		for t in build._targets:
-			if isinstance(t, Executable):
-				targets.append(self.make_executable_node(t))
-			elif isinstance(t, Library):
-				targets.append(self.make_library_node(t))
-
-
-		return RootNode(targets)
+		return RootNode([self.make_target_node(t) for t in build._targets])
 	
 
-	def make_header_node(self, path: Path) -> HeaderNode:
+	def make_target_node(self, target) -> TargetNode:
 
-		if path in self.visited_headers:
-			print(path)
-			return self.visited_headers[path]
-		
-		header = HeaderNode(
-			path,
-			[]
-		)
-		self.visited_headers[path] = header
+		if isinstance(target, Executable):
+			return self.make_executable_node(target)
+		elif isinstance(target, StaticLibrary):
+			return self.make_static_library_node(target)
+		elif isinstance(target, SharedLibrary):
+			return self.make_shared_library_node(target)
+		else:
+			raise RuntimeError("What")
 
-		deps = self.compiler.get_dependencies(path, include_dirs=self.include_dirs)	
-		included_headers = [self.make_header_node(d) for d in deps]
 
-		header.headers = included_headers
-		
-		return header
-			
+	def make_library_node(self, lib: Library) -> LibraryNode:
 
-	def _make_source_node(self, path: Path) -> SourceNode:
+		if isinstance(lib, PreCompiledLibrary):
+			return self.make_precompiled_lib_node(lib)
+		elif isinstance(lib, StaticLibrary):
+			return self.make_static_library_node(lib)
+		elif isinstance(lib, SharedLibrary):
+			return self.make_shared_library_node(lib)
+		else:
+			raise RuntimeError("What")
 
-		if path in self.visited_sources:
-			return self.visited_sources[path]
-		
-		outfile = self.object_dir / path.parent / (path.name + ".o")
-
-		if not outfile.parent.exists():
-			outfile.parent.mkdir(511, True, True)
-
-		source = SourceNode(
-			path,
-			outfile,
-			[]
-		)
-
-		self.visited_sources[path] = source
-
-		deps = self.compiler.get_dependencies(path, include_dirs=self.include_dirs)	
-		included_headers = [self.make_header_node(d) for d in deps]
-
-		source.headers = included_headers
-
-		return source
-	
-
-	def make_source_nodes(self, source: Source) -> list[SourceNode]:
-		return [self._make_source_node(p) for p in source._sources_paths]
-	
 
 	def make_executable_node(self, exe: Executable) -> ExecutableNode:
 		
@@ -138,14 +104,6 @@ class GraphConstructor:
 
 		return node
 	
-
-	def make_library_node(self, lib: Library) -> LibraryNode:
-		if isinstance(lib, StaticLibrary):
-			return self.make_static_library_node(lib)
-		elif isinstance(lib, SharedLibrary):
-			return self.make_shared_library_node(lib)
-		else:
-			raise RuntimeError("What")
 
 
 	def make_static_library_node(self, lib: StaticLibrary) -> StaticLibraryNode:
@@ -219,3 +177,59 @@ class GraphConstructor:
 		return node
 
 
+	def make_precompiled_lib_node(self, lib: PreCompiledLibrary) -> PreCompiledLibraryNode:
+		return PreCompiledLibraryNode(
+			lib.filepath,
+			lib.headers.public
+		)
+
+
+	def make_header_node(self, path: Path) -> HeaderNode:
+
+		if path in self.visited_headers:
+			print(path)
+			return self.visited_headers[path]
+		
+		header = HeaderNode(
+			path,
+			[]
+		)
+		self.visited_headers[path] = header
+
+		deps = self.compiler.get_dependencies(path, include_dirs=self.include_dirs)	
+		included_headers = [self.make_header_node(d) for d in deps]
+
+		header.deps = included_headers
+		
+		return header
+			
+
+	def _make_source_node(self, path: Path) -> SourceNode:
+
+		if path in self.visited_sources:
+			return self.visited_sources[path]
+		
+		outfile = self.object_dir / path.parent / (path.name + ".o")
+
+		if not outfile.parent.exists():
+			outfile.parent.mkdir(511, True, True)
+
+		source = SourceNode(
+			path,
+			outfile,
+			[]
+		)
+
+		self.visited_sources[path] = source
+
+		deps = self.compiler.get_dependencies(path, include_dirs=self.include_dirs)	
+		included_headers = [self.make_header_node(d) for d in deps]
+
+		source.deps = included_headers
+
+		return source
+	
+
+	def make_source_nodes(self, source: Source) -> list[SourceNode]:
+		return [self._make_source_node(p) for p in source._sources_paths]
+	

@@ -8,10 +8,10 @@ class StaticLibrary(Library):
 	Class to build a static library.
 	"""
 
-	def __init__(self) -> None:
+	def __init__(self, name: str) -> None:
 		self.headers = Headers()
 		self._source: Source
-		self._name: str
+		self._name: str = name
 		self._linked_libs: list[Library] = []
 
 

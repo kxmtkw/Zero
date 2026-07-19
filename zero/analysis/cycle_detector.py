@@ -105,6 +105,11 @@ class CycleDetector(NodeVisitor):
 		self.tracked_nodes.pop()
 	
 
+	def visitPreCompiledLibraryNode(self, node: PreCompiledLibraryNode):
+		if node not in self.visited_nodes:
+			self.visited_nodes.add(node)
+
+
 	def visitSourceNode(self, node: SourceNode):
 		if node not in self.visited_nodes:
 			self.visited_nodes.add(node)
@@ -115,7 +120,7 @@ class CycleDetector(NodeVisitor):
 
 		self.tracked_nodes.append(node)
 
-		for header in node.headers:
+		for header in node.deps:
 			self.visit(header)
 
 		self.tracked_nodes.pop()
@@ -131,7 +136,7 @@ class CycleDetector(NodeVisitor):
 
 		self.tracked_nodes.append(node)
 
-		for header in node.headers:
+		for header in node.deps:
 			self.visit(header)
 
 		self.tracked_nodes.pop()

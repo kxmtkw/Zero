@@ -68,7 +68,7 @@ class Orchestrator:
 
 		cycle = CycleDetector()
 		cycle.visit(root)
-		exit(1)
+
 		print(">> Starting build...")
 
 		self.builder = Builder(compiler)

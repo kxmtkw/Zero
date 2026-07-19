@@ -22,8 +22,12 @@ class NodeVisitor(ABC):
 			self.visitStaticLibraryNode(node)
 		elif isinstance(node, SharedLibraryNode):
 			self.visitSharedLibraryNode(node)
+		elif isinstance(node, PreCompiledLibraryNode):
+			self.visitPreCompiledLibraryNode(node)
 		elif isinstance(node, RootNode):
 			self.visitRootNode(node)
+		else:
+			raise RuntimeError("WHAT")
 
 
 	@abstractmethod
@@ -40,6 +44,10 @@ class NodeVisitor(ABC):
 
 	@abstractmethod
 	def visitSharedLibraryNode(self, node: SharedLibraryNode):
+		pass
+
+	@abstractmethod
+	def visitPreCompiledLibraryNode(self, node: PreCompiledLibraryNode):
 		pass
 	
 	@abstractmethod
