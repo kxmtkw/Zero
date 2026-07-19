@@ -6,6 +6,8 @@ from zero.builder.builder import Builder
 from zero.compilers import GccCompiler, GxxCompiler, ClangCompiler, ClangxxCompiler
 from zero.graph.printer import NodePrinter
 
+from zero.analysis.cycle_detector import CycleDetector
+
 
 class Orchestrator:
 
@@ -62,6 +64,11 @@ class Orchestrator:
 		printer = NodePrinter()
 		printer.visit(root)
 
+		print(">> Detecting cycles...")
+
+		cycle = CycleDetector()
+		cycle.visit(root)
+		exit(1)
 		print(">> Starting build...")
 
 		self.builder = Builder(compiler)
