@@ -59,16 +59,20 @@ class GraphConstructor:
 	def make_header_node(self, path: Path) -> HeaderNode:
 
 		if path in self.visited_headers:
+			print(path)
 			return self.visited_headers[path]
 		
+		header = HeaderNode(
+			path,
+			[]
+		)
+		self.visited_headers[path] = header
+
 		deps = self.compiler.get_dependencies(path, include_dirs=self.include_dirs)	
 		included_headers = [self.make_header_node(d) for d in deps]
 
-		header = HeaderNode(
-			path,
-			included_headers
-		)
-		self.visited_headers[path] = header
+		header.headers = included_headers
+		
 		return header
 			
 
@@ -77,9 +81,6 @@ class GraphConstructor:
 		if path in self.visited_sources:
 			return self.visited_sources[path]
 		
-		deps = self.compiler.get_dependencies(path, include_dirs=self.include_dirs)	
-		included_headers = [self.make_header_node(d) for d in deps]
-
 		outfile = self.object_dir / path.parent / (path.name + ".o")
 
 		if not outfile.parent.exists():
@@ -88,10 +89,15 @@ class GraphConstructor:
 		source = SourceNode(
 			path,
 			outfile,
-			included_headers
+			[]
 		)
 
 		self.visited_sources[path] = source
+
+		deps = self.compiler.get_dependencies(path, include_dirs=self.include_dirs)	
+		included_headers = [self.make_header_node(d) for d in deps]
+
+		source.headers = included_headers
 
 		return source
 	
