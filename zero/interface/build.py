@@ -67,3 +67,11 @@ class Build:
 				raise RuntimeError("No source specified for this library.")
 			
 			self._targets.append(target)
+
+	
+	def make(self):
+
+		from zero.orchestrator import Orchestrator
+
+		o = Orchestrator()
+		o.start(self)
