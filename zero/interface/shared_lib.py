@@ -15,6 +15,7 @@ class SharedLibrary(Library):
 		self._source: Source
 		self._name: str = name
 		self._linked_libs: list[Library] = []
+		self._arguments: list[str] = []
 
 
 	@property
@@ -43,6 +44,18 @@ class SharedLibrary(Library):
 	@name.setter
 	def name(self, name: str):
 		self._name = name
+
+
+	@property
+	def arguments(self):
+		return self._arguments
+	
+	
+	@arguments.setter
+	def arguments(self, *args: str):
+		if not isinstance(args, tuple):
+			args = (args,)
+		self._arguments = list(*args)
 
 
 	def link(self, library: Library):

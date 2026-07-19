@@ -16,6 +16,8 @@ class Builder(NodeVisitor):
 		
 		self.visited_nodes: set[object] = set()
 
+		self.current_target_arguments: list[str] = []
+
 
 	def visitRootNode(self, node: RootNode):
 		for target in node.targets:
@@ -39,6 +41,8 @@ class Builder(NodeVisitor):
 
 		self.include_dirs = include_dirs
 		
+		self.current_target_arguments = node.arguments
+
 		for deps in node.sources:
 			self.visit(deps)
 
@@ -66,11 +70,13 @@ class Builder(NodeVisitor):
 
 		self.include_dirs = include_dirs
 
+		self.current_target_arguments = node.arguments
+
 		for deps in node.sources:
 			self.visit(deps)
 
 		self.compiler.build_shared_lib([n.outpath for n in node.sources], [l.libpath for l in node.linked_libraries], node.libpath)
-
+		
 		self.compiling_shared_lib = False
 		self.visited_nodes.add(node)
 	
@@ -99,6 +105,8 @@ class Builder(NodeVisitor):
 
 		self.include_dirs = include_dirs
 
+		self.current_target_arguments = node.arguments
+
 		for deps in node.sources:
 			self.visit(deps)
 
@@ -116,7 +124,13 @@ class Builder(NodeVisitor):
 		for deps in node.deps:
 			self.visit(deps)
 
-		self.compiler.build_file(node.filepath, node.outpath, for_shared=self.compiling_shared_lib, include_dirs=self.include_dirs)
+		self.compiler.build_file(
+			node.filepath, 
+			node.outpath, 
+			for_shared=self.compiling_shared_lib, 
+			include_dirs=self.include_dirs, 
+			arguments=self.current_target_arguments
+		)
 		
 		self.visited_nodes.add(node)
 		

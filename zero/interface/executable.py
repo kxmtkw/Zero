@@ -17,6 +17,7 @@ class Executable:
 		self._source: Source
 		self._name: str = name
 		self._linked_libs: list[Library] = []
+		self._arguments: list[str] = []
 
 
 	@property
@@ -43,6 +44,17 @@ class Executable:
 		
 		return self._name
 	
+	@property
+	def arguments(self):
+		return self._arguments
+	
+	
+	@arguments.setter
+	def arguments(self, *args: str):
+		if not isinstance(args, tuple):
+			args = (args,)
+		self._arguments = list(*args)
+
 
 	def link(self, library: Library):
 		"Link a library to this executable."

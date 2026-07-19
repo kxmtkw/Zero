@@ -40,11 +40,11 @@ class GccCompiler(BaseCompiler):
 		return self._parse_dependencies(process.stdout)
 
 
-	def build_file(self, filepath: Path, outfile: Path, *, for_shared = False, include_dirs: list[Path] = []) -> None:  
+	def build_file(self, filepath: Path, outfile: Path, *, for_shared = False, include_dirs: list[Path] = [], arguments: list[str] = []) -> None:  
 
 		include_args = [f"-I{str(dir)}" for dir in include_dirs]
 
-		cmd = [self.compiler_binary, "-c", *include_args, str(filepath), "-o", str(outfile)] 
+		cmd = [self.compiler_binary, *arguments, "-c", *include_args, str(filepath), "-o", str(outfile)] 
 
 		if for_shared:
 			cmd.append("-fPIC")

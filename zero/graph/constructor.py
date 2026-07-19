@@ -97,6 +97,7 @@ class GraphConstructor:
 			outfile,
 			source_nodes,
 			lib_nodes,
+			exe._arguments,
 			exe.headers.private
 		)
 
@@ -133,6 +134,7 @@ class GraphConstructor:
 			outfile,
 			source_nodes,
 			lib_nodes,
+			lib._arguments,
 			lib.headers.private,
 			lib.headers.public
 		)
@@ -168,6 +170,7 @@ class GraphConstructor:
 			outfile,
 			source_nodes,
 			lib_nodes,
+			lib._arguments,
 			lib.headers.private,
 			lib.headers.public
 		)
@@ -187,7 +190,6 @@ class GraphConstructor:
 	def make_header_node(self, path: Path) -> HeaderNode:
 
 		if path in self.visited_headers:
-			print(path)
 			return self.visited_headers[path]
 		
 		header = HeaderNode(

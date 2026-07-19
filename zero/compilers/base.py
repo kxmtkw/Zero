@@ -17,7 +17,7 @@ class BaseCompiler(ABC):
 
 
 	@abstractmethod
-	def build_file(self, filepath: Path, outfile: Path, *, for_shared = False, include_dirs: list[Path] = []) -> None:  
+	def build_file(self, filepath: Path, outfile: Path, *, for_shared = False, include_dirs: list[Path] = [], arguments: list[str] = []) -> None:  
 		pass
 	
 

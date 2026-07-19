@@ -19,11 +19,12 @@ class TargetNode(Node):
 	a list of source nodes and a list of libraries linked against that target.
 	"""
 	@abstractmethod
-	def __init__(self, *, targetpath: Path, sources: Sequence[SourceNode], libs: Sequence[LibraryNode], **kwargs):
+	def __init__(self, *, targetpath: Path, sources: Sequence[SourceNode], libs: Sequence[LibraryNode], arguments: list[str], **kwargs):
 		super().__init__(**kwargs)
 		self.targetpath: Path = targetpath
 		self.sources: Sequence[SourceNode] = sources
 		self.linked_libraries: Sequence[LibraryNode] = libs
+		self.arguments: list[str] = arguments
 
 
 class LibraryNode(Node):
@@ -62,18 +63,19 @@ class RootNode(Node):
 
 class ExecutableNode(TargetNode):
 
-	def __init__(self, exepath: Path, sources: Sequence[SourceNode], libs: Sequence[LibraryNode], private_headers: Sequence[Path]):
-		super().__init__(targetpath=exepath, sources=sources, libs=libs)
+	def __init__(self, exepath: Path, sources: Sequence[SourceNode], libs: Sequence[LibraryNode], arguments: list[str], private_headers: Sequence[Path]):
+		super().__init__(targetpath=exepath, sources=sources, libs=libs, arguments=arguments)
 		self.private_headers = private_headers
 
 
 class StaticLibraryNode(TargetNode, LibraryNode):
 
-	def __init__(self, libpath: Path, sources: Sequence[SourceNode], libs: Sequence[LibraryNode], private_headers: Sequence[Path], public_headers: Sequence[Path]):
+	def __init__(self, libpath: Path, sources: Sequence[SourceNode], libs: Sequence[LibraryNode], arguments: list[str], private_headers: Sequence[Path], public_headers: Sequence[Path]):
 		super().__init__(
 			targetpath=libpath, 
 			sources=sources,
 			libs=libs,
+			arguments=arguments,
 			libpath=libpath, 
 			private_headers=private_headers, 
 			public_headers=public_headers
@@ -82,11 +84,12 @@ class StaticLibraryNode(TargetNode, LibraryNode):
 
 class SharedLibraryNode(TargetNode, LibraryNode):
 
-	def __init__(self, libpath: Path, sources: Sequence[SourceNode], libs: Sequence[LibraryNode], private_headers: Sequence[Path], public_headers: Sequence[Path]):
+	def __init__(self, libpath: Path, sources: Sequence[SourceNode], libs: Sequence[LibraryNode], arguments: list[str], private_headers: Sequence[Path], public_headers: Sequence[Path]):
 		super().__init__(
 			targetpath=libpath, 
 			sources=sources,
 			libs=libs,
+			arguments=arguments,
 			libpath=libpath, 
 			private_headers=private_headers, 
 			public_headers=public_headers
