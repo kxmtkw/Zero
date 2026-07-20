@@ -2,6 +2,7 @@ from zero.graph.nodes import Node
 from zero.graph.visitor import NodeVisitor
 from zero.graph.nodes import *
 
+from zero.reporter import getReporter
 
 
 class CycleDetector(NodeVisitor):
@@ -11,6 +12,8 @@ class CycleDetector(NodeVisitor):
 		self.visited_nodes: set[Node] = set()
 		self.tracked_nodes: list[Node] = []
 		self.is_cycle_detected: bool = False
+
+		self.reporter = getReporter()
 
 
 	def getCycle(self, node: Node) -> list[Node]:
@@ -25,7 +28,6 @@ class CycleDetector(NodeVisitor):
 				cycle.append(node)
 				break
 
-		print(cycle)
 		return cycle
 	
 
@@ -38,6 +40,7 @@ class CycleDetector(NodeVisitor):
 	
 
 	def visitRootNode(self, node: RootNode):
+
 		if node not in self.visited_nodes:
 			self.visited_nodes.add(node)
 

@@ -4,6 +4,8 @@ from zero.graph.visitor import NodeVisitor
 
 from zero.compilers import BaseCompiler
 
+from zero.reporter import getReporter
+
 
 class Builder(NodeVisitor):
 
@@ -13,22 +15,23 @@ class Builder(NodeVisitor):
 		self.compiling_shared_lib = False
 
 		self.include_dirs: list[Path] = []
-		
 		self.visited_nodes: set[object] = set()
-
 		self.current_target_arguments: list[str] = []
+
+		self.reporter = getReporter()
 
 
 	def visitRootNode(self, node: RootNode):
+		self.reporter.startPhase("Compilation", "Compiling")
 		for target in node.targets:
 			self.visit(target)
+
+		self.reporter.endPhase("Build complete")
 
 
 	def visitStaticLibraryNode(self, node: StaticLibraryNode):
 		if node in self.visited_nodes:
 			return
-
-		print(f">> Compiling static lib: {str(node.libpath)}")
 
 		include_dirs = []
 
@@ -48,6 +51,8 @@ class Builder(NodeVisitor):
 
 		self.compiler.buildStaticLib([n.outpath for n in node.sources], node.libpath)
 		
+		self.reporter.taskDone("Link ", f"{node.libpath.name}")
+
 		self.visited_nodes.add(node)
 
 
@@ -78,6 +83,9 @@ class Builder(NodeVisitor):
 		self.compiler.buildSharedLib([n.outpath for n in node.sources], [l.libpath for l in node.linked_libraries], node.libpath)
 		
 		self.compiling_shared_lib = False
+
+		self.reporter.taskDone("Link ", f"{node.libpath.name}")
+
 		self.visited_nodes.add(node)
 	
 
@@ -86,15 +94,13 @@ class Builder(NodeVisitor):
 		if not node.libpath.exists():
 			raise RuntimeError(f"Could not find pre-compiled library: {node.libpath}")
 		
-		print(f">> Found Pre Compiled Lib: {str(node.libpath)}")
+		self.reporter.taskDone("Found", f"{node.libpath}")
 
 
 	def visitExecutableNode(self, node: ExecutableNode):
 		if node in self.visited_nodes:
 			return
 		
-		print(f">> Building executable: {str(node.targetpath)}")
-
 		include_dirs = []
 
 		for lib in node.linked_libraries:
@@ -112,14 +118,14 @@ class Builder(NodeVisitor):
 
 		self.compiler.buildExecutable([n.outpath for n in node.sources], [n.libpath for n in node.linked_libraries], node.targetpath)
 
+		self.reporter.taskDone("Link ", f"{node.targetpath.name}")
+
 		self.visited_nodes.add(node)
 
 		
 	def visitSourceNode(self, node: SourceNode):
 		if node in self.visited_nodes:
 			return
-
-		print(f"-- Building source: {node.filepath}")
 
 		for deps in node.deps:
 			self.visit(deps)
@@ -132,6 +138,8 @@ class Builder(NodeVisitor):
 			arguments=self.current_target_arguments
 		)
 		
+		self.reporter.taskDone("Built", f"{node.filepath}")
+
 		self.visited_nodes.add(node)
 		
 

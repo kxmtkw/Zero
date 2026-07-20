@@ -6,17 +6,20 @@ from zero.builder.builder import Builder
 from zero.compilers import GccCompiler, GxxCompiler, ClangCompiler, ClangxxCompiler
 from zero.graph.printer import NodePrinter
 
-from zero.analysis.cycle_detector import CycleDetector
+from zero.analyzers.cycle_detector import CycleDetector
+
+from zero.reporter import TerminalReporter
 
 
 class Orchestrator:
 
 	def __init__(self) -> None:
-		pass
+		self.reporter = TerminalReporter()
+
 
 	def start(self, build: Build):
 
-		print(">> Setting up build...")
+		self.reporter.startPhase("Configuration", "Configuring")
 
 		match build.compiler:
 			case "gcc":
@@ -30,7 +33,7 @@ class Orchestrator:
 			case _:
 				raise RuntimeError(f"Unknown compiler specified: {build.compiler}")
 			
-		print(f"Chosen Compiler: {build.compiler}")
+		self.reporter.taskDone("Compiler", f"{build.compiler} chosen.")
 
 		build.directory.mkdir(511, True, True)
 
@@ -46,9 +49,8 @@ class Orchestrator:
 		shared_dir.mkdir(511, True, True)
 		static_dir.mkdir(511, True, True)
 
-		print(f"Build Directory: {build.directory}")
+		self.reporter.taskDone("Directory", f"{str(build_dir)} chosen.")
 
-		print(">> Constructing build graph...")
 
 		self.graph = GraphConstructor(
 			compiler,
@@ -61,15 +63,14 @@ class Orchestrator:
 
 		root = self.graph.makeRoot(build)
 
-		printer = NodePrinter()
-		printer.visit(root)
-
-		print(">> Detecting cycles...")
-
 		cycle = CycleDetector()
 		cycle.visit(root)
 
-		print(">> Starting build...")
+		self.reporter.taskDone("Graph", "constructed (no cycles).")
+
+		self.reporter.endPhase("Configuration complete.")
+
 
 		self.builder = Builder(compiler)
 		self.builder.visit(root)
+

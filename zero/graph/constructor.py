@@ -10,6 +10,8 @@ from zero.interface.static_lib import StaticLibrary
 from zero.interface.shared_lib import SharedLibrary
 from zero.interface.precomp_lib import PreCompiledLibrary
 
+from zero.reporter import getReporter
+
 
 class GraphConstructor:
 
@@ -40,11 +42,13 @@ class GraphConstructor:
 		self.shared_lib_dir = shared_lib_dir
 
 		self.include_dirs: list[Path] = []
+
+		self.reporter = getReporter()
 		
 
 	def makeRoot(self, build: Build) -> RootNode:
-		
-		return RootNode([self.makeTargetNode(t) for t in build._targets])
+		root = RootNode([self.makeTargetNode(t) for t in build._targets])
+		return root
 	
 
 	def makeTargetNode(self, target) -> TargetNode:
