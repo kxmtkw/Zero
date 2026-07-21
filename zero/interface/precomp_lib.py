@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from .headers import Headers
+from .headers import PublicOnlyHeaders
 from .source import Source
-from .lib import Library
+from .library import Library
 
 
 class PreCompiledLibrary(Library):
@@ -11,10 +11,11 @@ class PreCompiledLibrary(Library):
 	"""
 
 	def __init__(self, filepath: str | Path) -> None:
-		self.headers = Headers()
-		self._filepath: Path = Path(filepath)
+		super().__init__()
+		self.headers = PublicOnlyHeaders()
+		self._filepath = Path(filepath)
+
 
 	@property
 	def filepath(self):
 		return self._filepath
-	

@@ -1,73 +1,14 @@
-from pathlib import Path
 
-from zero.compilers.types import CompilerType
-from zero.interface.lib import Library
-
-from .static_lib import StaticLibrary
-from .source import Source
-from .headers import Headers
+from zero.interface.headers import PrivateOnlyHeaders
+from zero.interface.target import Target
 
 
-class Executable:
+
+class Executable(Target):
 	"""
-	Class to build an executable.
+	Build an executable.
 	"""
 
 	def __init__(self, name: str) -> None:
-		self.headers = Headers()
-		self._source: Source
-		self._name: str = name
-		self._linked_libs: list[Library] = []
-		self._arguments: list[str] = []
-		self._compiler: CompilerType = "inherit"
-
-
-	@property
-	def source(self):
-		"Specify the source files for the executable. Can only be set once."	
-
-		if not hasattr(self, "_source"):
-			raise RuntimeError("Source not specified for this source.")
-			
-		return self._source
-	
-
-	@source.setter
-	def source(self, src: Source):
-		self._source = src
-
-	
-	@property
-	def name(self):
-		"Specify the output files for the executable. Can only be set once."
-
-		if not hasattr(self, "_name"):
-			raise RuntimeError("name not specified for this source.")
-		
-		return self._name
-	
-	@property
-	def arguments(self):
-		return self._arguments
-	
-	
-	@arguments.setter
-	def arguments(self, *args: str):
-		if not isinstance(args, tuple):
-			args = (args,)
-		self._arguments = list(*args)
-
-
-	@property
-	def compiler(self):
-		return self._compiler
-	
-	
-	@compiler.setter
-	def compiler(self, name: CompilerType):
-		self._compiler = name
-
-
-	def link(self, library: Library):
-		"Link a library to this executable."
-		self._linked_libs.append(library)
+		super().__init__(name=name)
+		self.headers = PrivateOnlyHeaders()

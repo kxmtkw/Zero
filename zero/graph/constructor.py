@@ -1,4 +1,5 @@
 from zero.compilers.get import getCompiler
+from zero.compilers.types import CompilerType
 from zero.graph.nodes import *
 from zero.compilers import BaseCompiler
 
@@ -6,7 +7,7 @@ from zero.compilers import BaseCompiler
 from zero.interface.build import Build
 from zero.interface.executable import Executable
 from zero.interface.source import Source
-from zero.interface.lib import Library
+from zero.interface.library import Library
 from zero.interface.static_lib import StaticLibrary
 from zero.interface.shared_lib import SharedLibrary
 from zero.interface.precomp_lib import PreCompiledLibrary
@@ -18,7 +19,7 @@ class GraphConstructor:
 
 	def __init__(
 			self, 
-			root_compiler: str,
+			root_compiler: CompilerType,
 			build_dir: Path,
 			object_dir: Path,
 			exec_dir: Path,
@@ -52,11 +53,7 @@ class GraphConstructor:
 		compilers = {}
 
 		for t in build._targets:
-			if t.compiler == "inherit":
-				self.current_compiler = self.root_compiler
-			else:
-				self.current_compiler = getCompiler(t.compiler)
-				
+			self.current_compiler = getCompiler(t._compiler)
 			node = self.makeTargetNode(t)
 			targets.append(node)
 			compilers[node] = self.current_compiler
@@ -64,7 +61,7 @@ class GraphConstructor:
 		root = RootNode(
 			targets,
 			compilers
-			)
+		)
 		
 		return root
 	

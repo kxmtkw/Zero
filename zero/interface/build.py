@@ -2,9 +2,11 @@ from pathlib import Path
 from typing import Literal
 
 from zero.compilers.types import CompilerType
+from zero.errors.errors import ZeroUserError
+from zero.interface.target import Target
 
-from .lib import Library
-from .executable import Executable
+from zero.interface.library import Library
+from zero.interface.executable import Executable
 
 
 class Build:
@@ -14,7 +16,7 @@ class Build:
 
 
 	def __init__(self) -> None:
-		self._targets: list[Executable | Library] = []
+		self._targets: list[Target] = []
 		self._compiler: CompilerType = "inherit"
 		self._directory: Path = Path("build")
 
@@ -23,7 +25,6 @@ class Build:
 	def compiler(self):
 		"""
 		Specify a compiler for the build system. 
-		If not specified, finds the best matched compiler depending on the platform.
 		"""
 		return self._compiler
 
@@ -46,7 +47,7 @@ class Build:
 		self._directory = Path(name)
 
 
-	def add(self, target: Executable | Library):
+	def add(self, target: Target, *, compiler: CompilerType = "inherit"):
 		"""
 		Add a target to the build procedure.
 		 
@@ -56,19 +57,17 @@ class Build:
 		then that static library should not be added.
 		"""
 
-		if isinstance(target, Executable):
-
-			if not hasattr(target, "_source"):
-				raise RuntimeError("No source specified for this executable.")
-			
-			self._targets.append(target)
-
-		elif isinstance(target, Library):
-
-			if not hasattr(target, "_source"):
-				raise RuntimeError("No source specified for this library.")
-			
-			self._targets.append(target)
+		if not hasattr(target, "_source"):
+			raise ZeroUserError(ValueError, "No source specified for this target.")
+		
+		if self._compiler is None and compiler == "inherit":
+			raise ZeroUserError(
+				ValueError, 
+				"No compiler specified for build. Cannot inherit. Either select a compiler for the target or the build."
+			)
+		
+		target._compiler = self._compiler if compiler == "inherit" else compiler
+		self._targets.append(target)
 
 	
 	def make(self):
