@@ -2,6 +2,8 @@ from pathlib import Path
 from abc import ABC, abstractmethod
 from typing import Sequence
 
+from zero.compilers.base import BaseCompiler
+
 class Node(ABC):
 	"""
 	Base node class.
@@ -56,9 +58,10 @@ class FileNode(Node):
 
 class RootNode(Node):
 
-	def __init__(self, targets: Sequence[TargetNode]):
+	def __init__(self, targets: Sequence[TargetNode], compilers: dict[TargetNode, BaseCompiler]):
 		super().__init__()
 		self.targets: Sequence[TargetNode] = targets
+		self.target_compilers: dict[TargetNode, BaseCompiler] = compilers
 
 
 class ExecutableNode(TargetNode):

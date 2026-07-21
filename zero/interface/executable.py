@@ -18,6 +18,7 @@ class Executable:
 		self._name: str = name
 		self._linked_libs: list[Library] = []
 		self._arguments: list[str] = []
+		self._compiler: str | None = None
 
 
 	@property
@@ -54,6 +55,16 @@ class Executable:
 		if not isinstance(args, tuple):
 			args = (args,)
 		self._arguments = list(*args)
+
+
+	@property
+	def compiler(self):
+		return self._compiler
+	
+	
+	@compiler.setter
+	def compiler(self, name: str):
+		self._compiler = name
 
 
 	def link(self, library: Library):

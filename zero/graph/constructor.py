@@ -1,3 +1,4 @@
+from zero.compilers.get import getCompiler
 from zero.graph.nodes import *
 from zero.compilers import BaseCompiler
 
@@ -17,7 +18,7 @@ class GraphConstructor:
 
 	def __init__(
 			self, 
-			compiler: BaseCompiler, 
+			root_compiler: str,
 			build_dir: Path,
 			object_dir: Path,
 			exec_dir: Path,
@@ -33,8 +34,6 @@ class GraphConstructor:
 		self.made_shared_libs: dict[SharedLibrary, SharedLibraryNode] = {}
 		self.made_ompiled_libs: dict[PreCompiledLibrary, PreCompiledLibraryNode] = {}
 
-		self.compiler = compiler
-
 		self.build_dir = build_dir
 		self.object_dir = object_dir
 		self.exec_dir = exec_dir
@@ -43,11 +42,26 @@ class GraphConstructor:
 
 		self.include_dirs: list[Path] = []
 
-		self.reporter = getReporter()
+		self.root_compiler = getCompiler(root_compiler)
+		self.current_compiler = self.root_compiler
 		
 
 	def makeRoot(self, build: Build) -> RootNode:
-		root = RootNode([self.makeTargetNode(t) for t in build._targets])
+		targets = [self.makeTargetNode(t) for t in build._targets]
+		targets = []
+		compilers = {}
+
+		for t in build._targets:
+			self.current_compiler = getCompiler(t.compiler, self.root_compiler)
+			node = self.makeTargetNode(t)
+			targets.append(node)
+			compilers[node] = self.current_compiler
+
+		root = RootNode(
+			targets,
+			compilers
+			)
+		
 		return root
 	
 
@@ -201,7 +215,7 @@ class GraphConstructor:
 		)
 		self.visited_headers[path] = header
 
-		deps = self.compiler.getDependencies(path, include_dirs=self.include_dirs) 
+		deps = self.current_compiler.getDependencies(path, include_dirs=self.include_dirs) 
 		included_headers = [self.makeHeaderNode(d) for d in deps]
 
 		header.deps = included_headers
@@ -227,7 +241,7 @@ class GraphConstructor:
 
 		self.visited_sources[path] = source
 
-		deps = self.compiler.getDependencies(path, include_dirs=self.include_dirs) 
+		deps = self.current_compiler.getDependencies(path, include_dirs=self.include_dirs) 
 		included_headers = [self.makeHeaderNode(d) for d in deps]
 
 		source.deps = included_headers

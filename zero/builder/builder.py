@@ -9,9 +9,8 @@ from zero.reporter import getReporter
 
 class Builder(NodeVisitor):
 
-	def __init__(self, compiler: BaseCompiler) -> None:
+	def __init__(self) -> None:
 		super().__init__()
-		self.compiler = compiler
 		self.compiling_shared_lib = False
 
 		self.include_dirs: list[Path] = []
@@ -20,10 +19,15 @@ class Builder(NodeVisitor):
 
 		self.reporter = getReporter()
 
+		self.current_compiler: BaseCompiler
+
+
 
 	def visitRootNode(self, node: RootNode):
 		self.reporter.startPhase("Compilation", "Compiling")
+
 		for target in node.targets:
+			self.current_compiler = node.target_compilers[target]
 			self.visit(target)
 
 		self.reporter.endPhase("Build complete")
@@ -49,7 +53,7 @@ class Builder(NodeVisitor):
 		for deps in node.sources:
 			self.visit(deps)
 
-		self.compiler.buildStaticLib([n.outpath for n in node.sources], node.libpath)
+		self.current_compiler.buildStaticLib([n.outpath for n in node.sources], node.libpath)
 		
 		self.reporter.taskDone("Link ", f"{node.libpath.name}")
 
@@ -60,7 +64,6 @@ class Builder(NodeVisitor):
 		if node in self.visited_nodes:
 			return
 
-		print(f">> Compiling shared lib: {str(node.libpath)}")
 
 		self.compiling_shared_lib = True
 
@@ -80,7 +83,7 @@ class Builder(NodeVisitor):
 		for deps in node.sources:
 			self.visit(deps)
 
-		self.compiler.buildSharedLib([n.outpath for n in node.sources], [l.libpath for l in node.linked_libraries], node.libpath)
+		self.current_compiler.buildSharedLib([n.outpath for n in node.sources], [l.libpath for l in node.linked_libraries], node.libpath)
 		
 		self.compiling_shared_lib = False
 
@@ -116,7 +119,7 @@ class Builder(NodeVisitor):
 		for deps in node.sources:
 			self.visit(deps)
 
-		self.compiler.buildExecutable([n.outpath for n in node.sources], [n.libpath for n in node.linked_libraries], node.targetpath)
+		self.current_compiler.buildExecutable([n.outpath for n in node.sources], [n.libpath for n in node.linked_libraries], node.targetpath)
 
 		self.reporter.taskDone("Link ", f"{node.targetpath.name}")
 
@@ -130,7 +133,7 @@ class Builder(NodeVisitor):
 		for deps in node.deps:
 			self.visit(deps)
 
-		self.compiler.buildFile(
+		self.current_compiler.buildFile(
 			node.filepath, 
 			node.outpath, 
 			for_shared=self.compiling_shared_lib, 

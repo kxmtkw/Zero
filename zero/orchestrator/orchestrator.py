@@ -20,21 +20,7 @@ class Orchestrator:
 	def start(self, build: Build):
 
 		self.reporter.startPhase("Configuration", "Configuring")
-
-		match build.compiler:
-			case "gcc":
-				compiler = GccCompiler()
-			case "g++":
-				compiler = GxxCompiler()
-			case "clang":
-				compiler = ClangCompiler()
-			case "clang++":
-				compiler = ClangxxCompiler()
-			case _:
-				raise RuntimeError(f"Unknown compiler specified: {build.compiler}")
 			
-		self.reporter.taskDone("Compiler", f"{build.compiler} chosen.")
-
 		build.directory.mkdir(511, True, True)
 
 		build_dir = build.directory
@@ -53,7 +39,7 @@ class Orchestrator:
 
 
 		self.graph = GraphConstructor(
-			compiler,
+			build._compiler,
 			build_dir,
 			object_dir,
 			exec_dir,
@@ -71,6 +57,6 @@ class Orchestrator:
 		self.reporter.endPhase("Configuration complete.")
 
 
-		self.builder = Builder(compiler)
+		self.builder = Builder()
 		self.builder.visit(root)
 
