@@ -59,10 +59,11 @@ class Target:
 	
 	
 	@arguments.setter
-	def arguments(self, *args: str):
-		self._arguments.clear()
-		for arg in args:
-			self._arguments.append(arg)
+	def arguments(self, args: tuple[str, ...] | str):
+		if isinstance(args, (tuple)):
+			self._arguments = [arg for arg in args]
+		else:
+			self._arguments = [args]
 
 
 	def link(self, library: Library):

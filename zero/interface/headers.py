@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from zero.interface.types import PathType
+
 
 class PublicOnlyHeaders:
 	"""
@@ -14,16 +16,12 @@ class PublicOnlyHeaders:
 	def public(self):
 		return self._public
 	
-	
 	@public.setter
-	def public(self, *dirs: str | Path):
-		self._public.clear()
-		for d in dirs:
-			if isinstance(d, str):
-				self._public.append(Path(d))
-				continue
-			self._public.append(d)
-
+	def public(self, dirs: tuple[PathType, ...] | PathType):
+		if isinstance(dirs, (tuple)):
+			self._public = [Path(d) for d in dirs]
+		else:
+			self._public = [Path(dirs)]
 
 
 class PrivateOnlyHeaders:
@@ -40,13 +38,11 @@ class PrivateOnlyHeaders:
 	
 	
 	@private.setter
-	def private(self, *dirs: str | Path):
-		self._private.clear()
-		for d in dirs:
-			if isinstance(d, str):
-				self._private.append(Path(d))
-				continue
-			self._private.append(d)
+	def private(self, dirs: tuple[PathType, ...] | PathType):
+		if isinstance(dirs, (tuple)):
+			self._private = [Path(d) for d in dirs]
+		else:
+			self._private = [Path(dirs)]
 
 
 
