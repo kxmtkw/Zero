@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import Literal
 
+from zero.compilers.types import CompilerType
+
 from .lib import Library
 from .executable import Executable
 
@@ -13,7 +15,7 @@ class Build:
 
 	def __init__(self) -> None:
 		self._targets: list[Executable | Library] = []
-		self._compiler: Literal["gcc", "g++", "clang", "clang++", "best"] = "best"
+		self._compiler: CompilerType = "inherit"
 		self._directory: Path = Path("build")
 
 
@@ -27,7 +29,7 @@ class Build:
 
 
 	@compiler.setter
-	def compiler(self, name: Literal["gcc", "g++", "clang", "clang++", "best"]):
+	def compiler(self, name: CompilerType):
 		self._compiler = name
 
 

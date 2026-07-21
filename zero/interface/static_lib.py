@@ -1,4 +1,6 @@
 from pathlib import Path
+
+from zero.compilers.types import CompilerType
 from .source import Source
 from .lib import Library
 from .headers import Headers
@@ -14,7 +16,7 @@ class StaticLibrary(Library):
 		self._name: str = name
 		self._arguments: list[str] = []
 		self._linked_libs: list[Library] = []
-		self._compiler: str | None = None
+		self._compiler: CompilerType = "inherit"
 
 
 	@property
@@ -63,7 +65,7 @@ class StaticLibrary(Library):
 	
 	
 	@compiler.setter
-	def compiler(self, name: str):
+	def compiler(self, name: CompilerType):
 		self._compiler = name
 
 

@@ -7,7 +7,7 @@ from zero.compilers.clangxx import ClangxxCompiler
 from zero.compilers.gcc import GccCompiler
 from zero.compilers.gxx import GxxCompiler
 
-CompilerType = Literal["gcc", "g++", "clang", "clang++"]
+from zero.compilers.types import CompilerType
 
 _COMPILERS = {
 	"gcc": GccCompiler(),
@@ -15,7 +15,6 @@ _COMPILERS = {
 	"clang": ClangCompiler(),
 	"clang++": ClangxxCompiler(),
 }
-
 
 def getCompiler(compiler: CompilerType, default: BaseCompiler | None = None) -> BaseCompiler:
 	try:

@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from zero.compilers.types import CompilerType
+
 from .headers import Headers
 from .source import Source
 from .lib import Library
@@ -16,7 +18,7 @@ class SharedLibrary(Library):
 		self._name: str = name
 		self._linked_libs: list[Library] = []
 		self._arguments: list[str] = []
-		self._compiler: str | None = None
+		self._compiler: CompilerType = "inherit"
 
 
 	@property
@@ -65,7 +67,7 @@ class SharedLibrary(Library):
 	
 	
 	@compiler.setter
-	def compiler(self, name: str):
+	def compiler(self, name: CompilerType):
 		self._compiler = name
 
 

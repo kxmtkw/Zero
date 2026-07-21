@@ -52,7 +52,11 @@ class GraphConstructor:
 		compilers = {}
 
 		for t in build._targets:
-			self.current_compiler = getCompiler(t.compiler, self.root_compiler)
+			if t.compiler == "inherit":
+				self.current_compiler = self.root_compiler
+			else:
+				self.current_compiler = getCompiler(t.compiler)
+				
 			node = self.makeTargetNode(t)
 			targets.append(node)
 			compilers[node] = self.current_compiler
