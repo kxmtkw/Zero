@@ -6,7 +6,7 @@
 
 + Pre Compiled Libraries `Done`
 
-+ Linking C libs with C++ libs and vice versa
++ Linking C libs with C++ libs and vice versa `Done`
 	+ This currently fails because only a single compiler can be chosen.
 		+ Either we select compiler per target.
 		+ Or let the system pick g++ for C++ files automatically.
