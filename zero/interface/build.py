@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Literal
 
+from zero.compilers.base import BaseCompiler
 from zero.compilers.types import CompilerType
 from zero.errors.errors import ZeroUserError
 from zero.interface.target import Target
@@ -17,8 +18,9 @@ class Build:
 
 	def __init__(self) -> None:
 		self._targets: list[Target] = []
-		self._compiler: CompilerType = "inherit"
 		self._directory: Path = Path("build")
+		self._compiler: CompilerType | None = None
+		self._compiler_object: BaseCompiler
 
 
 	@property

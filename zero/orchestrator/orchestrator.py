@@ -4,8 +4,7 @@ from zero.errors import ZeroError
 from zero.interface.build import Build
 from zero.graph.constructor import GraphConstructor
 from zero.builder.builder import Builder
-from zero.compilers import GccCompiler, GxxCompiler, ClangCompiler, ClangxxCompiler
-from zero.graph.printer import NodePrinter
+from zero.compilers.get import getCompiler
 
 from zero.analyzers.cycle_detector import CycleDetector
 from zero.analyzers.stale_detector import StaleDetector
@@ -62,7 +61,7 @@ class Orchestrator:
 			
 		config = self.configureBuild(build.directory, fresh)
 
-		self.graph = GraphConstructor(build._compiler, config)
+		self.graph = GraphConstructor(config)
 
 		root = self.graph.makeRoot(build)
 
@@ -96,19 +95,38 @@ class Orchestrator:
 		if not isinstance(build, Build):
 			raise ZeroError(f"Attribute 'build' not found or is not an instance of Build.")
 		
+		if build._compiler is None:
+			raise ZeroError(f"No compiler provided for build.")
+		
+		try:
+			build._compiler_object = getCompiler(build._compiler)
+		except ValueError:
+			raise ZeroError(f"Unknown compiler: {build._compiler}")
+		
 		return build
 
 
 	def getTargets(self, module: ModuleLoader) -> list[Target]:
 
+		build = self.getBuild(module)
+
 		targets: list[Target] = []
 
 		for name, value in module:
 
-			if isinstance(value, Target):
-				if not hasattr(value, "_name"):
-					value._name = name
-				targets.append(value)
+			if not isinstance(value, Target):
+				continue
+
+			if not hasattr(value, "_name"):
+				value._name = name
+
+			try:
+				value._compiler_object = build._compiler_object if value._compiler == "inherit" else getCompiler(value._compiler)
+			except ValueError:
+				raise ZeroError(f"Unknown compiler: {value._compiler}")
+			
+			targets.append(value)
+
 
 		return targets
 

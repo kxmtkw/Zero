@@ -20,6 +20,7 @@ class Target:
 		self._name: str
 		self._source: Source
 		self._compiler: CompilerType = "inherit"
+		self._compiler_object: BaseCompiler
 
 
 	@property

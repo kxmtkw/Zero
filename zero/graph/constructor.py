@@ -18,11 +18,7 @@ from zero.reporter import getReporter
 
 class GraphConstructor:
 
-	def __init__(
-			self, 
-			root_compiler: CompilerType,
-			config: BuildConfig
-			) -> None:
+	def __init__(self, config: BuildConfig) -> None:
 
 		self.visited_headers: dict[Path, HeaderNode] = {}
 		self.visited_sources: dict[Path, SourceNode] = {}
@@ -39,18 +35,15 @@ class GraphConstructor:
 		self.shared_lib_dir = config.directory.shared_lib
 
 		self.include_dirs: list[Path] = []
-
-		self.root_compiler = getCompiler(root_compiler)
-		self.current_compiler = self.root_compiler
 		
 
 	def makeRoot(self, build: Build) -> RootNode:
-		targets = [self.makeTargetNode(t) for t in build._targets]
+
 		targets = []
 		compilers = {}
 
 		for t in build._targets:
-			self.current_compiler = self.root_compiler if t._compiler == "inherit" else getCompiler(t._compiler)
+			self.current_compiler = t._compiler_object
 			node = self.makeTargetNode(t)
 			targets.append(node)
 			compilers[node] = self.current_compiler
