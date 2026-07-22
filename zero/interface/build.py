@@ -45,26 +45,3 @@ class Build:
 	@directory.setter
 	def directory(self, name: str | Path):
 		self._directory = Path(name)
-
-
-	def add(self, target: Target, *, compiler: CompilerType = "inherit"):
-		"""
-		Add a target to the build procedure.
-		 
-		Some things to be cautious of:
-		- This should only be used for targets that are expected as final results. \
-		For example, if an executable depends on a static library but the library itself is not required as a final product, \
-		then that static library should not be added.
-		"""
-
-		if not hasattr(target, "_source"):
-			raise ZeroUserError(ValueError, "No source specified for this target.")
-		
-		if self._compiler is None and compiler == "inherit":
-			raise ZeroUserError(
-				ValueError, 
-				"No compiler specified for build. Cannot inherit. Either select a compiler for the target or the build."
-			)
-		
-		target._compiler = self._compiler if compiler == "inherit" else compiler
-		self._targets.append(target)

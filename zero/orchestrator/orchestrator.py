@@ -85,34 +85,47 @@ class Orchestrator:
 			raise ZeroError(f"Attribute 'build' not found or is not an instance of Build.")
 		
 		return build
-	
+
+
+	def getTargets(self, module: ModuleLoader) -> list[Target]:
+
+		targets: list[Target] = []
+
+		for name, value in module:
+
+			if isinstance(value, Target):
+				value._name = name
+				targets.append(value)
+
+		return targets
+
 
 	def makeBuild(self):
 		module = self.loadConfigFile()
 		build = self.getBuild(module)
+		build._targets = self.getTargets(module)
 		self.make(build)
 
 
-	def makeTargets(self, *target_identifiers: str):
+	def makeTargets(self, target_identifiers: list[str]):
 
 		module = self.loadConfigFile()
 		build = self.getBuild(module)
+		
+		needed_targets: list[Target] = []
+		targets: list[Target] = self.getTargets(module)
 
-		targets: list[Target] = []
+		for target in targets:
 
-		for identifier in target_identifiers:
-			target = module.getAttribute(identifier)
+			if target._name in target_identifiers:
+				target_identifiers.remove(target._name)
+				needed_targets.append(target)
 
-			if target is None:
-				raise ZeroError(f"Target '{identifier}' not found!")
+
+		if len(target_identifiers) > 0:
+			raise ZeroError(f"Target{'s' if len(target_identifiers) > 1 else ''} not found: {', '.join(target_identifiers)}")
 			
-			if not isinstance(target, Target):
-				raise ZeroError(f"Expected '{identifier}' to be a Target but was {type(target)}")
-			
-			targets.append(target)
-
-		# overriding the targets specified by the user.
-		build._targets = targets
+		build._targets = needed_targets
 
 		self.make(build)
 

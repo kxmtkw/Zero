@@ -28,3 +28,9 @@ class ModuleLoader:
 
 	def hasAttribute(self, name: str):
 		return hasattr(self.module, name)
+	
+	
+	def __iter__(self):
+		for key in dir(self.module):
+			if not key.startswith("_"):
+				yield key, getattr(self.module, key)

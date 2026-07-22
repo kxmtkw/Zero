@@ -9,6 +9,6 @@ class Executable(Target):
 	Build an executable.
 	"""
 
-	def __init__(self, name: str) -> None:
-		super().__init__(name=name)
+	def __init__(self) -> None:
+		super().__init__()
 		self.headers = PrivateOnlyHeaders()

@@ -13,24 +13,14 @@ class Target:
 	Should not be created manually.
 	"""
 
-	def __init__(self,*,  name: str, **kwargs,) -> None:
-		self._name: str = name
+	def __init__(self, **kwargs,) -> None:
 		self._linked_libs: list[Library] = []
 		self._arguments: list[str] = []
 		
+		self._name: str
 		self._source: Source
-		self._compiler: CompilerType
+		self._compiler: CompilerType = "inherit"
 
-
-	@property
-	def name(self):
-		"The name of this target."
-
-		if not hasattr(self, "_name"):
-			raise ZeroUserError(ValueError, "Name not specified for this target.")
-		
-		return self._name
-	
 
 	@property
 	def linkedLibs(self):

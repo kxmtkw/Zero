@@ -53,7 +53,7 @@ class GraphConstructor:
 		compilers = {}
 
 		for t in build._targets:
-			self.current_compiler = getCompiler(t._compiler)
+			self.current_compiler = self.root_compiler if t._compiler == "inherit" else getCompiler(t._compiler)
 			node = self.makeTargetNode(t)
 			targets.append(node)
 			compilers[node] = self.current_compiler
@@ -95,7 +95,7 @@ class GraphConstructor:
 		if exe in self.made_executables:
 			return self.made_executables[exe]
 		
-		outfile = self.exec_dir / exe.name
+		outfile = self.exec_dir / exe._name
 		
 		include_dirs: list[Path] = []
 		lib_nodes: list[LibraryNode] = []
@@ -130,7 +130,7 @@ class GraphConstructor:
 		if lib in self.made_static_libs:
 			return self.made_static_libs[lib]
 		
-		outfile = self.static_lib_dir / ("lib" + lib.name + ".a")
+		outfile = self.static_lib_dir / ("lib" + lib._name + ".a")
 
 		
 		include_dirs: list[Path] = []
@@ -167,7 +167,7 @@ class GraphConstructor:
 		if lib in self.made_shared_libs:
 			return self.made_shared_libs[lib]
 		
-		outfile = self.shared_lib_dir / ("lib" + lib.name + ".so")
+		outfile = self.shared_lib_dir / ("lib" + lib._name + ".so")
 
 		include_dirs: list[Path] = []
 		lib_nodes: list[LibraryNode] = []

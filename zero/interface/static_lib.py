@@ -7,6 +7,6 @@ class StaticLibrary(Target, Library):
 	Class to build a static library.
 	"""
 
-	def __init__(self, name: str) -> None:
-		super().__init__(name=name)
+	def __init__(self) -> None:
+		super().__init__()
 		self.headers = Headers()

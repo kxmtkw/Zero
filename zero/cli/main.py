@@ -12,6 +12,6 @@ def main():
 		if len(args.target) == 0:
 			orchestrator.makeBuild()
 		else:
-			orchestrator.makeTargets(*args.target)
+			orchestrator.makeTargets(args.target)
 
 
