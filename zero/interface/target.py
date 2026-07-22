@@ -23,10 +23,22 @@ class Target:
 
 
 	@property
-	def linkedLibs(self):
-		"Libraries linked against this target."
-		return self._linked_libs
+	def name(self):
+		"""
+		Get the name of the target. If not assigned by the user, this propery will be automatically assigned to the variable name.
+		Cannot be accessed if not manually assigned.
+		"""
+		if not hasattr(self, "_name"):
+			raise ZeroUserError(ValueError, "Name has not been specified for this target yet.")
+		return self._name
 	
+
+	@name.setter
+	def name(self, name: str):
+		if name == "":
+			raise ZeroUserError(ValueError, "Target name cannot be an empty string.")
+		self._name = name
+
 
 	@property
 	def source(self):
@@ -56,6 +68,22 @@ class Target:
 			self._arguments = [args]
 
 
+	@property
+	def compiler(self):
+		"Manually set the compiler for this target. By default, the target inherits from Build."
+		return self._compiler
+	
+
+	@compiler.setter
+	def compiler(self, compiler: CompilerType):
+		self._compiler = compiler
+
+
 	def link(self, library: Library):
 		"Link a library to this target."
 		self._linked_libs.append(library)
+
+	@property
+	def linkedLibs(self):
+		"Libraries linked against this target."
+		return self._linked_libs

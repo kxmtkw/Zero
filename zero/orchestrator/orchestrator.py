@@ -94,7 +94,8 @@ class Orchestrator:
 		for name, value in module:
 
 			if isinstance(value, Target):
-				value._name = name
+				if not hasattr(value, "_name"):
+					value._name = name
 				targets.append(value)
 
 		return targets
