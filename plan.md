@@ -17,7 +17,7 @@
 + More Compilers
 	+ MSVC, G++, Clang++ `In-Progress`
 
-+ Stale detection and avoiding recompilation
++ Stale detection and avoiding recompilation `Done`
 
 + Multi OS support
 	+ Linux `In-Progress`
@@ -36,7 +36,7 @@
 
 + Add more visitors.
 	+ Cycle detectors `Done`
-	+ Change detectors
+	+ Change detectors `Done`
 
 + Readable error messages
 	+ Traceback upto the user script level
@@ -45,7 +45,7 @@
 + Clearer and Prettier log messages.
 	+ use rich
 
-+ Executable to run the build file automatically.
++ Executable to run the build file automatically. `In-Progress`
 	+ Could be faked by just running zero.py with specific arguments.
 ```bash
 zero build # runs the zero.py file
