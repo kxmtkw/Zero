@@ -7,10 +7,15 @@ from zero.compilers import BaseCompiler
 from zero.reporter import getReporter
 from zero.analyzers.stale_detector import isStale
 
+
 class Builder(NodeVisitor):
 
-	def __init__(self) -> None:
+	def __init__(self, fresh: bool = False) -> None:
+
 		super().__init__()
+
+		self.fresh_build = fresh
+
 		self.compiling_shared_lib = False
 
 		self.include_dirs: list[Path] = []
@@ -21,6 +26,12 @@ class Builder(NodeVisitor):
 
 		self.current_compiler: BaseCompiler
 
+
+	def detectStaleness(self, node: Node) -> bool:
+		if self.fresh_build:
+			return True
+		else:
+			return isStale(node)
 
 
 	def visitRootNode(self, node: RootNode):
@@ -37,7 +48,7 @@ class Builder(NodeVisitor):
 		if node in self.visited_nodes:
 			return
 		
-		if not isStale(node):
+		if not self.detectStaleness(node):
 			return
 
 		include_dirs = []
@@ -67,7 +78,7 @@ class Builder(NodeVisitor):
 		if node in self.visited_nodes:
 			return
 		
-		if not isStale(node):
+		if not self.detectStaleness(node):
 			return
 
 		self.compiling_shared_lib = True
@@ -109,7 +120,7 @@ class Builder(NodeVisitor):
 		if node in self.visited_nodes:
 			return
 		
-		if not isStale(node):
+		if not self.detectStaleness(node):
 			return
 		
 		include_dirs = []
@@ -139,7 +150,7 @@ class Builder(NodeVisitor):
 		if node in self.visited_nodes:
 			return
 		
-		if not isStale(node):
+		if not self.detectStaleness(node):
 			return
 
 		for deps in node.deps:

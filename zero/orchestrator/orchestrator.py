@@ -36,7 +36,7 @@ class Orchestrator:
 		return module
 	
 
-	def make(self, build: Build):
+	def make(self, build: Build, *, fresh: bool = False):
 		
 		self.reporter.startPhase("Configuration", "Configuring")
 			
@@ -72,16 +72,19 @@ class Orchestrator:
 		
 		self.reporter.taskDone("Graph", "constructed (no cycles)")
 
-		stale = StaleDetector()
-		stale.visit(root)
-		count = stale.getStaleCount()
-		msg = "no need for compilation" if count == 0 else f"detected (count = {count})"
-
+		if not fresh:
+			stale = StaleDetector()
+			stale.visit(root)
+			count = stale.getStaleCount()
+			msg = "no need for compilation" if count == 0 else f"detected (count = {count})"
+		else:
+			msg = "skipped - fresh make"
+		
 		self.reporter.taskDone("Staleness", msg)
 		
 		self.reporter.endPhase("Configuration complete.")
 
-		self.builder = Builder()
+		self.builder = Builder(fresh)
 		self.builder.visit(root)
 
 
@@ -109,14 +112,14 @@ class Orchestrator:
 		return targets
 
 
-	def makeBuild(self):
+	def makeBuild(self, *, fresh: bool = False):
 		module = self.loadConfigFile()
 		build = self.getBuild(module)
 		build._targets = self.getTargets(module)
-		self.make(build)
+		self.make(build, fresh=fresh)
 
 
-	def makeTargets(self, target_identifiers: list[str]):
+	def makeTargets(self, target_identifiers: list[str], *, fresh: bool = False):
 
 		module = self.loadConfigFile()
 		build = self.getBuild(module)
@@ -136,7 +139,7 @@ class Orchestrator:
 			
 		build._targets = needed_targets
 
-		self.make(build)
+		self.make(build, fresh=fresh)
 
 
 	

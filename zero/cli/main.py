@@ -10,8 +10,8 @@ def main():
 
 	if args.command == "make":
 		if len(args.target) == 0:
-			orchestrator.makeBuild()
+			orchestrator.makeBuild(fresh=args.fresh)
 		else:
-			orchestrator.makeTargets(args.target)
+			orchestrator.makeTargets(args.target, fresh=args.fresh)
 
 
