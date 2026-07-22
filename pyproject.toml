@@ -18,6 +18,9 @@ classifiers = [
 ]
 dependencies = []
 
+[project.scripts]
+zero = "zero.cli.main:main"
+
 [project.urls]
 Homepage = "https://github.com/kxmtkw/zero"
 
