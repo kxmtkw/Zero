@@ -8,6 +8,7 @@ from zero.compilers import GccCompiler, GxxCompiler, ClangCompiler, ClangxxCompi
 from zero.graph.printer import NodePrinter
 
 from zero.analyzers.cycle_detector import CycleDetector
+from zero.analyzers.stale_detector import StaleDetector
 
 from zero.interface.target import Target
 from zero.reporter import TerminalReporter
@@ -68,9 +69,16 @@ class Orchestrator:
 
 		cycle = CycleDetector()
 		cycle.visit(root)
+		
+		self.reporter.taskDone("Graph", "constructed (no cycles)")
 
-		self.reporter.taskDone("Graph", "constructed (no cycles).")
+		stale = StaleDetector()
+		stale.visit(root)
+		count = stale.getStaleCount()
+		msg = "no need for compilation" if count == 0 else f"detected (count = {count})"
 
+		self.reporter.taskDone("Staleness", msg)
+		
 		self.reporter.endPhase("Configuration complete.")
 
 		self.builder = Builder()

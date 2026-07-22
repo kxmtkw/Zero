@@ -5,7 +5,7 @@ from zero.graph.visitor import NodeVisitor
 from zero.compilers import BaseCompiler
 
 from zero.reporter import getReporter
-
+from zero.analyzers.stale_detector import isStale
 
 class Builder(NodeVisitor):
 
@@ -36,6 +36,9 @@ class Builder(NodeVisitor):
 	def visitStaticLibraryNode(self, node: StaticLibraryNode):
 		if node in self.visited_nodes:
 			return
+		
+		if not isStale(node):
+			return
 
 		include_dirs = []
 
@@ -63,7 +66,9 @@ class Builder(NodeVisitor):
 	def visitSharedLibraryNode(self, node: SharedLibraryNode):
 		if node in self.visited_nodes:
 			return
-
+		
+		if not isStale(node):
+			return
 
 		self.compiling_shared_lib = True
 
@@ -104,6 +109,9 @@ class Builder(NodeVisitor):
 		if node in self.visited_nodes:
 			return
 		
+		if not isStale(node):
+			return
+		
 		include_dirs = []
 
 		for lib in node.linked_libraries:
@@ -127,7 +135,11 @@ class Builder(NodeVisitor):
 
 		
 	def visitSourceNode(self, node: SourceNode):
+
 		if node in self.visited_nodes:
+			return
+		
+		if not isStale(node):
 			return
 
 		for deps in node.deps:
