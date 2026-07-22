@@ -9,6 +9,7 @@ from zero.graph.printer import NodePrinter
 
 from zero.analyzers.cycle_detector import CycleDetector
 
+from zero.interface.target import Target
 from zero.reporter import TerminalReporter
 
 from zero.utils import ModuleLoader
@@ -34,15 +35,8 @@ class Orchestrator:
 		return module
 	
 
-	def makeBuild(self):
-
-		module = self.loadConfigFile()
-
-		build = module.getAttribute("build")
-
-		if not isinstance(build, Build):
-			raise ZeroError(f"Attribute 'build' not found or is not an instance of Build")
-
+	def make(self, build: Build):
+		
 		self.reporter.startPhase("Configuration", "Configuring")
 			
 		build.directory.mkdir(511, True, True)
@@ -79,9 +73,48 @@ class Orchestrator:
 
 		self.reporter.endPhase("Configuration complete.")
 
-
 		self.builder = Builder()
 		self.builder.visit(root)
+
+
+	def getBuild(self, module: ModuleLoader) -> Build:
+	
+		build = module.getAttribute("build")
+
+		if not isinstance(build, Build):
+			raise ZeroError(f"Attribute 'build' not found or is not an instance of Build.")
+		
+		return build
+	
+
+	def makeBuild(self):
+		module = self.loadConfigFile()
+		build = self.getBuild(module)
+		self.make(build)
+
+
+	def makeTargets(self, *target_identifiers: str):
+
+		module = self.loadConfigFile()
+		build = self.getBuild(module)
+
+		targets: list[Target] = []
+
+		for identifier in target_identifiers:
+			target = module.getAttribute(identifier)
+
+			if target is None:
+				raise ZeroError(f"Target '{identifier}' not found!")
+			
+			if not isinstance(target, Target):
+				raise ZeroError(f"Expected '{identifier}' to be a Target but was {type(target)}")
+			
+			targets.append(target)
+
+		# overriding the targets specified by the user.
+		build._targets = targets
+
+		self.make(build)
 
 
 	

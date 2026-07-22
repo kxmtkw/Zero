@@ -9,6 +9,9 @@ def main():
 	orchestrator = Orchestrator()
 
 	if args.command == "make":
-		orchestrator.makeBuild()
+		if len(args.target) == 0:
+			orchestrator.makeBuild()
+		else:
+			orchestrator.makeTargets(*args.target)
 
 
