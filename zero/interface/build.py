@@ -68,11 +68,3 @@ class Build:
 		
 		target._compiler = self._compiler if compiler == "inherit" else compiler
 		self._targets.append(target)
-
-	
-	def make(self):
-
-		from zero.orchestrator import Orchestrator
-
-		o = Orchestrator()
-		o.start(self)

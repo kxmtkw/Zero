@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from zero.errors import ZeroError
 from zero.interface.build import Build
 from zero.graph.constructor import GraphConstructor
 from zero.builder.builder import Builder
@@ -10,14 +11,37 @@ from zero.analyzers.cycle_detector import CycleDetector
 
 from zero.reporter import TerminalReporter
 
+from zero.utils import ModuleLoader
+
 
 class Orchestrator:
 
 	def __init__(self) -> None:
 		self.reporter = TerminalReporter()
+		self.config_file = Path("zero.py")
 
 
-	def start(self, build: Build):
+	def loadConfigFile(self) -> ModuleLoader:
+
+		if not self.config_file.exists():
+			raise ZeroError(f"Config file '{str(self.config_file)}' not found.")
+		
+		try:
+			module = ModuleLoader(self.config_file)
+		except Exception as e:
+			raise ZeroError(f"[{e.__class__.__name__}] {str(e)}")
+		
+		return module
+	
+
+	def makeBuild(self):
+
+		module = self.loadConfigFile()
+
+		build = module.getAttribute("build")
+
+		if not isinstance(build, Build):
+			raise ZeroError(f"Attribute 'build' not found or is not an instance of Build")
 
 		self.reporter.startPhase("Configuration", "Configuring")
 			
@@ -36,7 +60,6 @@ class Orchestrator:
 		static_dir.mkdir(511, True, True)
 
 		self.reporter.taskDone("Directory", f"{str(build_dir)} chosen.")
-
 
 		self.graph = GraphConstructor(
 			build._compiler,
@@ -59,4 +82,9 @@ class Orchestrator:
 
 		self.builder = Builder()
 		self.builder.visit(root)
+
+
+	
+
+
 

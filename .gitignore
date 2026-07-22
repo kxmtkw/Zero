@@ -3,7 +3,7 @@
 .venv/
 tests/
 **.egg-info/
-main.py
 
 # zero
+zero.py
 build/

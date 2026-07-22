@@ -1,0 +1,14 @@
+from zero.orchestrator import Orchestrator
+from zero.cli.args import setupParser, parseArguments
+
+
+def main():
+	parser = setupParser()
+	args = parseArguments(parser)
+
+	orchestrator = Orchestrator()
+
+	if args.command == "make":
+		orchestrator.makeBuild()
+
+
