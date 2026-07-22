@@ -4,17 +4,18 @@ from zero.graph.visitor import NodeVisitor
 
 from zero.compilers import BaseCompiler
 
+from zero.orchestrator.config import BuildConfig
 from zero.reporter import getReporter
 from zero.analyzers.stale_detector import isStale
 
 
 class Builder(NodeVisitor):
 
-	def __init__(self, fresh: bool = False) -> None:
+	def __init__(self, config: BuildConfig) -> None:
 
 		super().__init__()
 
-		self.fresh_build = fresh
+		self.fresh_build = config.fresh_build
 
 		self.compiling_shared_lib = False
 

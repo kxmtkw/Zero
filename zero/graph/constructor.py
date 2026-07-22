@@ -12,6 +12,7 @@ from zero.interface.static_lib import StaticLibrary
 from zero.interface.shared_lib import SharedLibrary
 from zero.interface.precomp_lib import PreCompiledLibrary
 
+from zero.orchestrator.config import BuildConfig
 from zero.reporter import getReporter
 
 
@@ -20,11 +21,7 @@ class GraphConstructor:
 	def __init__(
 			self, 
 			root_compiler: CompilerType,
-			build_dir: Path,
-			object_dir: Path,
-			exec_dir: Path,
-			static_lib_dir: Path,
-			shared_lib_dir: Path
+			config: BuildConfig
 			) -> None:
 
 		self.visited_headers: dict[Path, HeaderNode] = {}
@@ -35,11 +32,11 @@ class GraphConstructor:
 		self.made_shared_libs: dict[SharedLibrary, SharedLibraryNode] = {}
 		self.made_ompiled_libs: dict[PreCompiledLibrary, PreCompiledLibraryNode] = {}
 
-		self.build_dir = build_dir
-		self.object_dir = object_dir
-		self.exec_dir = exec_dir
-		self.static_lib_dir = static_lib_dir
-		self.shared_lib_dir = shared_lib_dir
+		self.build_dir = config.directory.build
+		self.object_dir = config.directory.objects
+		self.exec_dir = config.directory.binary
+		self.static_lib_dir = config.directory.static_lib
+		self.shared_lib_dir = config.directory.shared_lib
 
 		self.include_dirs: list[Path] = []
 

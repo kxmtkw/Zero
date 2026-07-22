@@ -11,6 +11,7 @@ from zero.analyzers.cycle_detector import CycleDetector
 from zero.analyzers.stale_detector import StaleDetector
 
 from zero.interface.target import Target
+from zero.orchestrator.config import BuildConfig, Directory
 from zero.reporter import TerminalReporter
 
 from zero.utils import ModuleLoader
@@ -36,41 +37,41 @@ class Orchestrator:
 		return module
 	
 
+	def configureBuild(self, build_dir: Path, fresh_build: bool) -> BuildConfig:
+
+		config = BuildConfig()
+		config.directory = Directory()
+		
+		config.directory.build = build_dir
+		config.directory.binary = build_dir / "bin"
+		config.directory.objects = build_dir / "objects"
+		config.directory.lib = build_dir / "lib"
+		config.directory.shared_lib = config.directory.lib / "shared"
+		config.directory.static_lib = config.directory.lib / "static"
+
+		config.fresh_build = fresh_build
+
+		self.reporter.taskDone("Directory", f"{str(build_dir)} chosen.")
+
+		return config
+
+	
 	def make(self, build: Build, *, fresh: bool = False):
 		
 		self.reporter.startPhase("Configuration", "Configuring")
 			
-		build.directory.mkdir(511, True, True)
+		config = self.configureBuild(build.directory, fresh)
 
-		build_dir = build.directory
-		exec_dir = build_dir / "bin"
-		object_dir = build_dir / "objects"
-		lib_dir = build_dir / "lib"
-		shared_dir = lib_dir / "shared"
-		static_dir = lib_dir / "static"
-
-		exec_dir.mkdir(511, True, True)
-		object_dir.mkdir(511, True, True)
-		shared_dir.mkdir(511, True, True)
-		static_dir.mkdir(511, True, True)
-
-		self.reporter.taskDone("Directory", f"{str(build_dir)} chosen.")
-
-		self.graph = GraphConstructor(
-			build._compiler,
-			build_dir,
-			object_dir,
-			exec_dir,
-			static_dir,
-			shared_dir
-		)
+		self.graph = GraphConstructor(build._compiler, config)
 
 		root = self.graph.makeRoot(build)
+
+		self.reporter.taskDone("Graph", "constructed")
 
 		cycle = CycleDetector()
 		cycle.visit(root)
 		
-		self.reporter.taskDone("Graph", "constructed (no cycles)")
+		self.reporter.taskDone("Cycles", "none detected")
 
 		if not fresh:
 			stale = StaleDetector()
@@ -84,7 +85,7 @@ class Orchestrator:
 		
 		self.reporter.endPhase("Configuration complete.")
 
-		self.builder = Builder(fresh)
+		self.builder = Builder(config)
 		self.builder.visit(root)
 
 
