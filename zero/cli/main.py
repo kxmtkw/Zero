@@ -14,4 +14,7 @@ def main():
 		else:
 			orchestrator.makeTargets(args.target, fresh=args.fresh)
 
+	elif args.command == "run":
+		orchestrator.runExecutable(args.executable, args.executable_args, fresh=args.fresh)
+		
 

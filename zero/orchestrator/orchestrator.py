@@ -9,8 +9,10 @@ from zero.compilers.get import getCompiler
 from zero.analyzers.cycle_detector import CycleDetector
 from zero.analyzers.stale_detector import StaleDetector
 
+from zero.interface.executable import Executable
 from zero.interface.target import Target
 from zero.orchestrator.config import BuildConfig, Directory
+from zero.orchestrator.executor import Executor
 from zero.reporter import TerminalReporter
 
 from zero.utils import ModuleLoader
@@ -52,16 +54,14 @@ class Orchestrator:
 
 		config.fresh_build = fresh_build
 
-		self.reporter.taskDone("Directory", f"{str(build_dir)} chosen.")
-
 		return config
 
 	
-	def make(self, build: Build, *, fresh: bool = False):
+	def make(self, build: Build, config: BuildConfig):
 		
 		self.reporter.startPhase("Configuration", "Configuring")
 			
-		config = self.configureBuild(build.directory, fresh)
+		self.reporter.taskDone("Directory", f"{str(build.directory)} chosen.")
 
 		self.graph = GraphConstructor(config)
 
@@ -74,7 +74,7 @@ class Orchestrator:
 		
 		self.reporter.taskDone("Cycles", "none detected")
 
-		if not fresh:
+		if not config.fresh_build:
 			stale = StaleDetector()
 			stale.visit(root)
 			count = stale.getStaleCount()
@@ -137,7 +137,10 @@ class Orchestrator:
 		module = self.loadConfigFile()
 		build = self.getBuild(module)
 		build._targets = self.getTargets(module)
-		self.make(build, fresh=fresh)
+
+		config = self.configureBuild(build.directory, fresh)
+
+		self.make(build, config)
 
 
 	def makeTargets(self, target_identifiers: list[str], *, fresh: bool = False):
@@ -160,9 +163,41 @@ class Orchestrator:
 			
 		build._targets = needed_targets
 
-		self.make(build, fresh=fresh)
+		config = self.configureBuild(build.directory, fresh)
+
+		self.make(build, config)
 
 
+	def runExecutable(self, name: str, args: list[str], *, fresh: bool = False):
+		
+		module = self.loadConfigFile()
+		build = self.getBuild(module)
+		targets = self.getTargets(module)
+		config = self.configureBuild(build.directory, fresh)
+
+		executable: Executable | None = None
+
+		for target in targets:
+			if isinstance(target, Executable) and target.name == name:
+				executable = target
+				break
+
+		if executable is None:
+			raise RuntimeError(f"Executable {name} not found.")
+		
+		executable_path = config.directory.binary / name
+
+		if not executable_path.exists() or fresh:
+			build._targets = [executable]
+			self.make(build, config)
+		
+		executor = Executor()
+
+		executor.run(
+			str(executable_path),
+			args
+		)
+		
 	
 
 
