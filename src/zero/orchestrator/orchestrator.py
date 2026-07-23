@@ -22,7 +22,7 @@ class Orchestrator:
 
 	def __init__(self) -> None:
 		self.reporter = TerminalReporter()
-		self.config_file = Path("zero.py")
+		self.config_file = Path("zerobuild.py")
 
 
 	def loadConfigFile(self) -> ModuleLoader:

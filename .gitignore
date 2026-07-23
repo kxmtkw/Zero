@@ -2,8 +2,10 @@
 **/__pycache__
 .venv/
 tests/
+dist/
 **.egg-info/
+uv.lock
 
 # zero
-zero.py
+zerobuild.py
 build/

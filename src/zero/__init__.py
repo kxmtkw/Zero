@@ -7,3 +7,13 @@ from zero.interface.executable import Executable
 from zero.interface.static_lib import StaticLibrary
 from zero.interface.shared_lib import SharedLibrary
 from zero.interface.precomp_lib import PreCompiledLibrary
+
+__all__ = [
+	"Path",
+	"Build",
+	"Source",
+	"Executable",
+	"StaticLibrary",
+	"SharedLibrary",
+	"PreCompiledLibrary"
+]
