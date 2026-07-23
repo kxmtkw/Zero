@@ -7,7 +7,7 @@ The only reason `Zero` exists is because I hate CMake syntax.
 
 ## Usage
 
-First, create a `zero.py` file in your project root and import `zero`
+First, create a `zerobuild.py` file in your project root and import `zero`
 
 ```python
 from zero import *
@@ -46,9 +46,9 @@ A binary named `main` can now be found at `build/bin/main`
 
 ## Installation
 
-`Zero` is still in its infant stage. Proper installation does not exist. To still install, run:
+`Zero` is still in its infant stage, but you can install it through any pypi package manager. The package name is `zero-build`.
 ```bash
-git clone https://github.com/kxmtkw/Zero.git zero
-cd zero
-pip install --break-system-packages -e .
+pip install zero-build
 ```
+> [!WARNING]
+> For Linux, You might have to use `--break-system-packages`. This is a workaround for now until I make packages for major Linux distributions.
