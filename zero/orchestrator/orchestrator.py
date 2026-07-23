@@ -48,6 +48,8 @@ class Orchestrator:
 		config.directory.shared_lib = config.directory.lib / "shared"
 		config.directory.static_lib = config.directory.lib / "static"
 
+		config.directory.create_all()
+
 		config.fresh_build = fresh_build
 
 		self.reporter.taskDone("Directory", f"{str(build_dir)} chosen.")
